@@ -1,0 +1,58 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+    <PropertyGroup>
+        <TargetFramework>netstandard2.1</TargetFramework>
+        <Description>Diplomacy Mod for Terra Invicta</Description>
+        <Version>1.0.0</Version>
+        <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+        <LangVersion>11</LangVersion>
+        <Company>TerraInvicta.Diplomacy</Company>
+        <Product>TerraInvicta.Diplomacy</Product>
+        <AssemblyVersion>1.0.0</AssemblyVersion>
+        <FileVersion>1.0.0</FileVersion>
+        <PackageId>TerraInvicta.Diplomacy</PackageId>
+        <Authors>3ger</Authors>
+        <RootNamespace>Diplomacy</RootNamespace>
+    </PropertyGroup>
+
+    <ItemGroup Condition="'$(TargetFramework.TrimEnd(`0123456789`))' == 'net'">
+        <PackageReference Include="Microsoft.NETFramework.ReferenceAssemblies" Version="1.0.2" PrivateAssets="all"/>
+    </ItemGroup>
+
+    <ItemGroup>
+        <Reference Include="0Harmony">
+            <HintPath>$(TERRAINVICTA_PATH)\TerraInvicta_Data\Managed\UnityModManager\0Harmony.dll</HintPath>
+        </Reference>
+        <Reference Include="Assembly-CSharp">
+            <HintPath>$(TERRAINVICTA_PATH)\TerraInvicta_Data\Managed\Assembly-CSharp.dll</HintPath>
+        </Reference>
+        <Reference Include="Assembly-CSharp-firstpass">
+            <HintPath>$(TERRAINVICTA_PATH)\TerraInvicta_Data\Managed\Assembly-CSharp-firstpass.dll</HintPath>
+        </Reference>
+        <Reference Include="Unity.TextMeshPro">
+            <HintPath>$(TERRAINVICTA_PATH)\TerraInvicta_Data\Managed\Unity.TextMeshPro.dll</HintPath>
+        </Reference>
+        <Reference Include="UnityEngine.CoreModule">
+            <HintPath>$(TERRAINVICTA_PATH)\TerraInvicta_Data\Managed\UnityEngine.CoreModule.dll</HintPath>
+        </Reference>
+        <Reference Include="UnityEngine.InputLegacyModule">
+            <HintPath>$(TERRAINVICTA_PATH)\TerraInvicta_Data\Managed\UnityEngine.InputLegacyModule.dll</HintPath>
+        </Reference>
+        <Reference Include="UnityModManager">
+            <HintPath>$(TERRAINVICTA_PATH)\TerraInvicta_Data\Managed\UnityModManager\UnityModManager.dll</HintPath>
+        </Reference>
+    </ItemGroup>
+
+    <!--    <Target Name="PostBuild" AfterTargets="PostBuildEvent">-->
+    <!--        <Exec-->
+    <!--                Command="xcopy &quot;$(TargetDir)$(ProjectName).dll&quot; &quot;$(TERRAINVICTA_PATH)\Mods\Enabled\$(ProjectName)\$(ProjectName).dll&quot; /F /R /Y /I &#xA;xcopy &quot;$(TargetDir)$(ProjectName).pdb&quot; &quot;$(TERRAINVICTA_PATH)\Mods\Enabled\$(ProjectName)\$(ProjectName).pdb&quot; /F /R /Y /I"/>-->
+    <!--    </Target>-->
+
+    <Target Name="PostBuild" AfterTargets="PostBuildEvent">
+        <Copy SourceFiles="$(ProjectDir)ModData\ModInfo.json" DestinationFiles="$(TERRAINVICTA_PATH)\Mods\Enabled\$(ProjectName)\ModInfo.json" OverwriteReadOnlyFiles="true"/>
+        <Copy SourceFiles="$(TargetDir)$(ProjectName).dll" DestinationFiles="$(TERRAINVICTA_PATH)\Mods\Enabled\$(ProjectName)\$(ProjectName).dll" OverwriteReadOnlyFiles="true"/>
+        <Copy SourceFiles="$(TargetDir)$(ProjectName).pdb" DestinationFiles="$(TERRAINVICTA_PATH)\Mods\Enabled\$(ProjectName)\$(ProjectName).pdb" OverwriteReadOnlyFiles="true"/>
+        <Copy SourceFiles="$(ProjectDir)ModData\Localization\en\TIDiplomacy.en"
+              DestinationFiles="$(TERRAINVICTA_PATH)\Mods\Enabled\$(ProjectName)\Localization\en\TIDiplomacy.en" OverwriteReadOnlyFiles="true"/>
+    </Target>
+</Project>

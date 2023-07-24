@@ -1,0 +1,14 @@
+{
+	"Id": "TerraInvicta.Diplomacy",
+	"DisplayName": "Diplomacy Mod",
+	"Title": "TerraInvicta.Diplomacy",
+	"Author": "3ger",
+	"Version": "1.0.0",
+	"Requirements": [],
+	"ManagerVersion": "0.25.0.0",
+	"AssemblyName": "TerraInvicta.Diplomacy.dll",
+	"EntryMethod": "Diplomacy.ModInit.Load",
+	"ModURL": "URL",
+	"HomePage": "NexusModsURL",
+	"Description": "Example Description"
+}
