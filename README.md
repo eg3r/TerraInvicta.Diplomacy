@@ -13,11 +13,9 @@ A mod for Terra Invicta aimed at improving player experience regarding Relations
 
 ## Upcoming Features
 
-* Improve on existing features (Ai to Ai diplomacy does not use new new features as of yet).
+* Improve on existing features (Ai to Ai diplomacy does not use the new features as of yet).
 * Add more Diplomacy treaties.
 * Improve hate logic in regard to diplomacy treaties.
-
-
 
 ## Installation (Manual)
 
