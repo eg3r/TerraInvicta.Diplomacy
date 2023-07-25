@@ -1,23 +1,47 @@
-﻿using PavonisInteractive.TerraInvicta;
+﻿using Newtonsoft.Json;
+using PavonisInteractive.TerraInvicta;
+
+// ReSharper disable SuggestBaseTypeForParameterInConstructor
 
 namespace Diplomacy.Core;
 
 public class DiplomacyTreaty
 {
-    private readonly int _treatyGameDay;
+    [JsonProperty] private readonly int _treatyGameDay;
+
+    [JsonConstructor]
+    public DiplomacyTreaty(int treatyGameDay, int initiatorID, int otherID, DiplomacyTreatyType treatyType)
+    {
+        InitiatorID = initiatorID;
+        OtherID = otherID;
+        TreatyType = treatyType;
+        _treatyGameDay = treatyGameDay;
+    }
 
     public DiplomacyTreaty(TIFactionState initiator, TIFactionState other, DiplomacyTreatyType treatyType)
     {
         TreatyType = treatyType;
-        Initiator = initiator;
-        Other = other;
+        InitiatorID = (int)initiator.ID;
+        OtherID = (int)other.ID;
         _treatyGameDay = TITimeState.CampaignDuration_days();
     }
 
-    public DiplomacyTreatyType TreatyType { get; }
-    public TIFactionState Initiator { get; }
-    public TIFactionState Other { get; }
-    public bool IsValid => IsValidTreatyTime();
+    [JsonProperty] public int InitiatorID { get; }
+    [JsonProperty] public int OtherID { get; }
+
+    [JsonProperty] public DiplomacyTreatyType TreatyType { get; }
+
+    [JsonIgnore] public bool IsValid => IsValidTreatyTime();
+
+    public TIFactionState GetInitiator()
+    {
+        return GameStateManager.FindGameState<TIFactionState>(InitiatorID);
+    }
+
+    public TIFactionState GetOther()
+    {
+        return GameStateManager.FindGameState<TIFactionState>(OtherID);
+    }
 
     private bool IsValidTreatyTime()
     {

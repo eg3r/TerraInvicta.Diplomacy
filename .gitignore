@@ -33,7 +33,9 @@ bld/
 [Ll]ogs/
 
 # idea/rider
-.idea/
+.idea/ 
+.run/
+
 
 # Visual Studio 2015/2017 cache/options directory
 .vs/

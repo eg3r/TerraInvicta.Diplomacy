@@ -6,13 +6,17 @@ namespace Diplomacy.Core;
 
 public static class ModState
 {
-    // TODO: move into settings
-    public const int ResetRelationsTreatyValidDays = 360;
-    public const int NapTreatyValidDays = 360;
-    public const int TruceTreatyValidDays = 360;
-    private static readonly List<DiplomacyTreaty> Treaties = new();
+    public const int ResetRelationsTreatyValidDays = 360; // TODO: move into settings
+    public const int NapTreatyValidDays = 360; // TODO: move into settings
+    public const int TruceTreatyValidDays = 360; // TODO: move into settings
+
+    private static InnerState _innerState = new();
+
+    private static List<DiplomacyTreaty> Treaties => _innerState.Treaties;
 
     public static DiplomacyTreatyType CurrentTreatyType { get; set; } = DiplomacyTreatyType.None;
+
+    public static string CurrentLoadedSave { get; private set; }
 
     public static void AddTreaty(DiplomacyTreaty treaty)
     {
@@ -21,15 +25,17 @@ public static class ModState
 
     public static bool IsTreatyValid(TIFactionState faction, TIFactionState other, DiplomacyTreatyType type)
     {
-        var treaty = Treaties.FirstOrDefault(t => t.Initiator == faction && t.Other == other && t.TreatyType == type);
+        var treaty = Treaties.FirstOrDefault(t =>
+            t.GetInitiator() == faction && t.GetOther() == other && t.TreatyType == type);
         if (treaty == null)
             return false;
 
         // if found and invalid, remove it
-        if (!treaty.IsValid)
+        var isValid = treaty.IsValid;
+        if (!isValid)
             RemoveTreaty(treaty);
 
-        return treaty.IsValid;
+        return isValid;
     }
 
     public static void Reset()
@@ -38,9 +44,16 @@ public static class ModState
         Treaties.Clear();
     }
 
-    public static void Load()
+    public static void Load(string saveName)
     {
-        // TODO: load state from some persistant source
+        CurrentLoadedSave = saveName;
+        if (SaveSystem.SaveExists(saveName))
+            _innerState = SaveSystem.Load<InnerState>(saveName);
+    }
+
+    public static void Save(string saveName)
+    {
+        SaveSystem.Save(_innerState, saveName);
     }
 
     private static void RemoveTreaty(DiplomacyTreaty treaty)
