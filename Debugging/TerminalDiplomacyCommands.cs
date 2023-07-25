@@ -19,6 +19,11 @@ public class TerminalDiplomacyCommands : IModClass
         RegisterCommands();
     }
 
+    public void SetActive(bool isActive)
+    {
+        _isActive = isActive;
+    }
+
     private void RegisterCommands()
     {
         _terminalController.RegisterCommand("startTrade", StartTrade,
@@ -60,10 +65,5 @@ public class TerminalDiplomacyCommands : IModClass
 
         Debug.Log("Start trade debug command called with wrong parameters ");
         UnityModManager.Logger.Log("Start trade debug command called with wrong parameters");
-    }
-
-    public void SetActive(bool isActive)
-    {
-        _isActive = isActive;
     }
 }

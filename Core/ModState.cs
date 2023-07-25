@@ -10,11 +10,14 @@ public static class ModState
     public const int ResetRelationsTreatyValidDays = 360;
     public const int NapTreatyValidDays = 360;
     public const int TruceTreatyValidDays = 360;
-
-    public static DiplomacyTreatyType CurrentTreatyType { get; set; } = DiplomacyTreatyType.None;
     private static readonly List<DiplomacyTreaty> Treaties = new();
 
-    public static void AddTreaty(DiplomacyTreaty treaty) => Treaties.Add(treaty);
+    public static DiplomacyTreatyType CurrentTreatyType { get; set; } = DiplomacyTreatyType.None;
+
+    public static void AddTreaty(DiplomacyTreaty treaty)
+    {
+        Treaties.Add(treaty);
+    }
 
     public static bool IsTreatyValid(TIFactionState faction, TIFactionState other, DiplomacyTreatyType type)
     {
@@ -40,6 +43,8 @@ public static class ModState
         // TODO: load state from some persistant source
     }
 
-    private static void RemoveTreaty(DiplomacyTreaty treaty) =>
+    private static void RemoveTreaty(DiplomacyTreaty treaty)
+    {
         Treaties.Remove(treaty);
+    }
 }

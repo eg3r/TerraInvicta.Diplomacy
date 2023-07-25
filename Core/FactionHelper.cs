@@ -20,13 +20,19 @@ public static class FactionHelper
     }
 
     public static float IdeologyDiffX(this TIFactionState faction, TIFactionState other)
-        => Math.Abs(faction.ideologyCoordinates.x - other.ideologyCoordinates.x);
+    {
+        return Math.Abs(faction.ideologyCoordinates.x - other.ideologyCoordinates.x);
+    }
 
     public static float IdeologyDiffY(this TIFactionState faction, TIFactionState other)
-        => Math.Abs(faction.ideologyCoordinates.y - other.ideologyCoordinates.y);
+    {
+        return Math.Abs(faction.ideologyCoordinates.y - other.ideologyCoordinates.y);
+    }
 
-    public static float IdeologyDiff(this TIFactionState faction, TIFactionState other) =>
-        TINationState.GetIdeologicalDistance(faction.ideologyCoordinates, other.ideologyCoordinates);
+    public static float IdeologyDiff(this TIFactionState faction, TIFactionState other)
+    {
+        return TINationState.GetIdeologicalDistance(faction.ideologyCoordinates, other.ideologyCoordinates);
+    }
 
     public static bool IsAtWar(this TIFactionState faction, TIFactionState other, bool bothSides = false)
     {

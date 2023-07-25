@@ -76,6 +76,6 @@ public class TiFactionStatePatch
         if (receivingFaction.malleable)
             theirScore *= 1.1f;
 
-        return (theirScore - myScore) + hateDelta;
+        return theirScore - myScore + hateDelta;
     }
 }

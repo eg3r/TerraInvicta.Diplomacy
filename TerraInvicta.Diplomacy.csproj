@@ -13,6 +13,15 @@
         <PackageId>TerraInvicta.Diplomacy</PackageId>
         <Authors>3ger</Authors>
         <RootNamespace>Diplomacy</RootNamespace>
+        <Platforms>AnyCPU;x64</Platforms>
+        <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
+        <ApplicationIcon/>
+        <OutputType>Library</OutputType>
+        <StartupObject/>
+    </PropertyGroup>
+
+    <PropertyGroup Condition=" '$(Configuration)' == 'Release' ">
+        <PlatformTarget>x64</PlatformTarget>
     </PropertyGroup>
 
     <ItemGroup Condition="'$(TargetFramework.TrimEnd(`0123456789`))' == 'net'">
@@ -52,7 +61,6 @@
         <Copy SourceFiles="$(ProjectDir)ModData\ModInfo.json" DestinationFiles="$(TERRAINVICTA_PATH)\Mods\Enabled\$(ProjectName)\ModInfo.json" OverwriteReadOnlyFiles="true"/>
         <Copy SourceFiles="$(TargetDir)$(ProjectName).dll" DestinationFiles="$(TERRAINVICTA_PATH)\Mods\Enabled\$(ProjectName)\$(ProjectName).dll" OverwriteReadOnlyFiles="true"/>
         <Copy SourceFiles="$(TargetDir)$(ProjectName).pdb" DestinationFiles="$(TERRAINVICTA_PATH)\Mods\Enabled\$(ProjectName)\$(ProjectName).pdb" OverwriteReadOnlyFiles="true"/>
-        <Copy SourceFiles="$(ProjectDir)ModData\Localization\en\TIDiplomacy.en"
-              DestinationFiles="$(TERRAINVICTA_PATH)\Mods\Enabled\$(ProjectName)\Localization\en\TIDiplomacy.en" OverwriteReadOnlyFiles="true"/>
+        <Copy SourceFiles="$(ProjectDir)ModData\Localization\en\TIDiplomacy.en" DestinationFiles="$(TERRAINVICTA_PATH)\Mods\Enabled\$(ProjectName)\Localization\en\TIDiplomacy.en" OverwriteReadOnlyFiles="true"/>
     </Target>
 </Project>

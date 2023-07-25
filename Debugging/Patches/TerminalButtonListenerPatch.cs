@@ -19,13 +19,9 @@ public class TerminalButtonListenerPatch
         {
             ___isShowingConsole = !___isShowingConsole;
             if (___isShowingConsole)
-            {
                 ___terminal.Show();
-            }
             else
-            {
                 ___terminal.Hide();
-            }
         }
     }
 }

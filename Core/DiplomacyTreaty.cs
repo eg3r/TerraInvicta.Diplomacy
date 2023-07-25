@@ -4,11 +4,6 @@ namespace Diplomacy.Core;
 
 public class DiplomacyTreaty
 {
-    public DiplomacyTreatyType TreatyType { get; }
-    public TIFactionState Initiator { get; }
-    public TIFactionState Other { get; }
-    public bool IsValid => IsValidTreatyTime();
-
     private readonly int _treatyGameDay;
 
     public DiplomacyTreaty(TIFactionState initiator, TIFactionState other, DiplomacyTreatyType treatyType)
@@ -18,6 +13,11 @@ public class DiplomacyTreaty
         Other = other;
         _treatyGameDay = TITimeState.CampaignDuration_days();
     }
+
+    public DiplomacyTreatyType TreatyType { get; }
+    public TIFactionState Initiator { get; }
+    public TIFactionState Other { get; }
+    public bool IsValid => IsValidTreatyTime();
 
     private bool IsValidTreatyTime()
     {
