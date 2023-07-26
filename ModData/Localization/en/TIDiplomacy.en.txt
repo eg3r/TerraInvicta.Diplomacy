@@ -4,3 +4,4 @@ TIDiplomacy.UI.Notifications.Alliance=Alliance
 TIDiplomacy.UI.Notifications.AllianceDescription=Agreement to be in an alliance. Preventing all hostile actions against each other and gain full intel.
 TIDiplomacy.UI.Notifications.BreakAlliance=Break Alliance
 TIDiplomacy.UI.Notifications.BreakAllianceDescription=Break alliance and worsen relations with each other to a conflict level.
+TIDiplomacy.UI.Notifications.Allied=Allied

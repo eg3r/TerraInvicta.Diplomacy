@@ -1,6 +1,8 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using Diplomacy.Core.Treaty;
+using JetBrains.Annotations;
 using PavonisInteractive.TerraInvicta;
 using UnityModManagerNet;
 
@@ -39,27 +41,32 @@ public static class FactionHelper
         return TINationState.GetIdeologicalDistance(faction.ideologyCoordinates, other.ideologyCoordinates);
     }
 
-    public static bool IsAtWar(this TIFactionState faction, TIFactionState other, bool bothSides = false)
+    public static bool IsAtWarWith(this TIFactionState faction, TIFactionState other, bool bothSides = false)
     {
         return faction.FindGoals(GoalType.WarOnFaction, faction, other).Any()
                || (bothSides && other.FindGoals(GoalType.WarOnFaction, other, faction).Any());
     }
 
-    public static bool HasNap(this TIFactionState faction, TIFactionState other)
+    public static bool HasNap(this TIFactionState faction, TIFactionState other, bool bothSides = true)
     {
         return faction.FindGoals(GoalType.NonAggressionPact, faction, other).Any() ||
-               other.FindGoals(GoalType.NonAggressionPact, other, faction).Any();
+               (bothSides && other.FindGoals(GoalType.NonAggressionPact, other, faction).Any());
     }
 
-    public static bool HasTruce(this TIFactionState faction, TIFactionState other)
+    public static bool HasTruce(this TIFactionState faction, TIFactionState other, bool bothSides = true)
     {
         return faction.FindGoals(GoalType.TruceWithFaction, faction, other).Any() ||
-               other.FindGoals(GoalType.TruceWithFaction, other, faction).Any();
+               (bothSides && other.FindGoals(GoalType.TruceWithFaction, other, faction).Any());
     }
 
-    public static bool HasAlliance(this TIFactionState faction, TIFactionState other)
+    public static bool HasAllianceWith(this TIFactionState faction, TIFactionState other)
     {
         return ModState.IsTreatyValid(faction, other, DiplomacyTreatyType.Alliance);
+    }
+
+    public static List<TIFactionState> GetAlliances(this TIFactionState faction)
+    {
+        return ModState.GetAlliancesFor(faction);
     }
 
     public static bool HasBrokenAlliance(this TIFactionState faction, TIFactionState other)
@@ -67,32 +74,37 @@ public static class FactionHelper
         return ModState.IsTreatyValid(faction, other, DiplomacyTreatyType.AllianceBroken);
     }
 
+    [CanBeNull]
+    public static DiplomacyTreaty GetLatestActiveTreaty(this TIFactionState faction, TIFactionState other)
+    {
+        return ModState.GetLatestTreatyBetween(faction, other);
+    }
+
     public static DiplomacyLevel CurrentDiplomacyLevelWith(this TIFactionState faction, TIFactionState other)
     {
-        var currentHate = other.GetFactionHate(faction);
-
-        if (faction.IsAtWar(other, true))
+        if (faction.IsAtWarWith(other, true))
             return DiplomacyLevel.War;
+
+        if (faction.permanentAlly(other))
+            return DiplomacyLevel.Allied;
 
         if (faction.HasNap(other))
             return DiplomacyLevel.Friendly;
 
-        if (faction.HasAlliance(other))
-            return DiplomacyLevel.Allied;
-
         var maxDipLevel = faction.MaxDiplomacyLevelWith(other);
+        var currentHate = other.GetFactionHate(faction);
 
-        if (currentHate > TemplateManager.global.factionHateWarThreshold)
+        if (currentHate >= TemplateManager.global.factionHateWarThreshold)
             return DiplomacyLevel.Enemy.Min(maxDipLevel);
 
-        if (currentHate > TemplateManager.global.factionHateConflictThreshold)
+        if (currentHate >= TemplateManager.global.factionHateConflictThreshold)
             return DiplomacyLevel.Conflict.Min(maxDipLevel);
 
-        if (currentHate >= -1)
+        if (currentHate >= -100 && currentHate < TemplateManager.global.factionHateConflictThreshold)
             return DiplomacyLevel.Normal.Min(maxDipLevel);
 
         UnityModManager.Logger.Log("CurrentDiplomacyLevelWith error");
-        return DiplomacyLevel.Normal; // fallback
+        return DiplomacyLevel.Normal.Min(maxDipLevel); // fallback
     }
 
     public static void ResetRelations(this TIFactionState faction, TIFactionState other, bool bothWays = false)

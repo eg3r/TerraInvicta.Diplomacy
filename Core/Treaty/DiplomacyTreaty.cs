@@ -33,6 +33,7 @@ public class DiplomacyTreaty
     [JsonProperty] public DiplomacyTreatyType TreatyType { get; }
 
     [JsonIgnore] public bool IsValid => CheckIfValid();
+    [JsonIgnore] public int TreatyGameDay => _treatyGameDay;
 
     public TIFactionState GetInitiator()
     {
@@ -47,7 +48,7 @@ public class DiplomacyTreaty
     private bool CheckIfValid()
     {
         // check used for treaty creation, if the days are small (same day) treaty is still in creation
-        if (TITimeState.CampaignDuration_days() - _treatyGameDay < 5)
+        if (TITimeState.CampaignDuration_days() - _treatyGameDay < 3)
             return true;
 
         switch (TreatyType)

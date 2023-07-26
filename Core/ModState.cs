@@ -11,6 +11,7 @@ public static class ModState
     public const int NapTreatyRepeatDays = 365 * 5; // TODO: move into settings
     public const int TruceTreatyRepeatDays = 365 * 2; // TODO: move into settings
     public const int AllianceBrokenValidDays = 365 * 2; // TODO: move into settings
+    public const int MinDaysBetweenTreaties = 90; // TODO: move into settings
 
     private static InnerState _innerState = new();
 
@@ -20,6 +21,38 @@ public static class ModState
 
     private static string CurrentLoadedSave { get; set; }
 
+
+    private static bool IsTreatyValid(DiplomacyTreaty treaty)
+    {
+        if (treaty == null)
+            return false;
+
+        var isValid = treaty.IsValid;
+        if (!isValid)
+            RemoveTreaty(treaty);
+
+        return isValid;
+    }
+
+    private static DiplomacyTreaty FindTreaty(TIFactionState faction, TIFactionState other, DiplomacyTreatyType type)
+    {
+        return Treaties.FirstOrDefault(t => ((t.GetInitiator() == faction && t.GetOther() == other)
+                                             || (t.GetInitiator() == other && t.GetOther() == faction))
+                                            && t.TreatyType == type);
+    }
+
+    private static List<DiplomacyTreaty> FindTreaties(
+        TIFactionState faction,
+        DiplomacyTreatyType type,
+        bool onlyValid = false)
+    {
+        return Treaties.FindAll(t =>
+            (t.GetInitiator() == faction || t.GetOther() == faction)
+            && t.TreatyType == type
+            && (!onlyValid || t.IsValid)
+        );
+    }
+
     public static void AddTreaty(DiplomacyTreaty treaty)
     {
         Treaties.Add(treaty);
@@ -27,20 +60,7 @@ public static class ModState
 
     public static bool IsTreatyValid(TIFactionState faction, TIFactionState other, DiplomacyTreatyType type)
     {
-        var treaty = Treaties.FirstOrDefault(t =>
-            ((t.GetInitiator() == faction && t.GetOther() == other)
-             || (t.GetInitiator() == other && t.GetOther() == faction))
-            && t.TreatyType == type);
-
-        if (treaty == null)
-            return false;
-
-        // if found and invalid, remove it
-        var isValid = treaty.IsValid;
-        if (!isValid)
-            RemoveTreaty(treaty);
-
-        return isValid;
+        return IsTreatyValid(FindTreaty(faction, other, type));
     }
 
     public static void Reset()
@@ -70,5 +90,44 @@ public static class ModState
     private static void RemoveTreaty(DiplomacyTreaty treaty)
     {
         Treaties.Remove(treaty);
+    }
+
+    public static void RemoveAllianceTreaty(TIFactionState faction, TIFactionState other)
+    {
+        var treaty = FindTreaty(faction, other, DiplomacyTreatyType.Alliance);
+        if (treaty != null)
+            RemoveTreaty(treaty);
+    }
+
+    public static void RemoveNapTreaty(TIFactionState faction, TIFactionState other)
+    {
+        var treaty = FindTreaty(faction, other, DiplomacyTreatyType.Nap);
+        if (treaty != null)
+            RemoveTreaty(treaty);
+    }
+
+    public static void RemoveTruce(TIFactionState faction, TIFactionState other)
+    {
+        var treaty = FindTreaty(faction, other, DiplomacyTreatyType.Truce);
+        if (treaty != null)
+            RemoveTreaty(treaty);
+    }
+
+    public static DiplomacyTreaty GetLatestTreatyBetween(TIFactionState faction, TIFactionState other)
+    {
+        return (from t in Treaties
+            where ((t.GetInitiator() == faction && t.GetOther() == other) ||
+                   (t.GetInitiator() == other && t.GetOther() == faction))
+                  && t.IsValid
+            orderby t.TreatyGameDay descending
+            select t).FirstOrDefault();
+    }
+
+    public static List<TIFactionState> GetAlliancesFor(TIFactionState faction)
+    {
+        return FindTreaties(faction, DiplomacyTreatyType.Alliance).Select(
+            treaty => treaty.GetOther() != faction
+                ? treaty.GetOther()
+                : treaty.GetInitiator()).ToList();
     }
 }

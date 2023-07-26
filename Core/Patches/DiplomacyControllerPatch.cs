@@ -27,6 +27,14 @@ public class DiplomacyControllerPatch
 
         var playerFaction = GameControl.control.activePlayer;
         var otherFaction = __instance.tradingFaction;
+
+        // apply cooldown of treaties 
+        var latestTreaty = playerFaction.GetLatestActiveTreaty(otherFaction);
+        if (latestTreaty != null &&
+            TITimeState.CampaignDuration_days() - latestTreaty.TreatyGameDay < ModState.MinDaysBetweenTreaties)
+            return;
+
+        var hasBrokenAlliance = playerFaction.HasBrokenAlliance(otherFaction);
         var maxDiplomacyLevel = playerFaction.MaxDiplomacyLevelWith(otherFaction);
         var currentDiplomacyLevel = playerFaction.CurrentDiplomacyLevelWith(otherFaction);
 
@@ -39,16 +47,15 @@ public class DiplomacyControllerPatch
             case DiplomacyLevel.Enemy when maxDiplomacyLevel > DiplomacyLevel.Conflict:
             case DiplomacyLevel.Conflict when maxDiplomacyLevel > DiplomacyLevel.Conflict:
                 var hasReset = ModState.IsTreatyValid(playerFaction, otherFaction, DiplomacyTreatyType.ResetRelation);
-                var hasBrokenAlliance = playerFaction.HasBrokenAlliance(otherFaction);
                 if (!hasReset && !hasBrokenAlliance)
                     OfferTreatyOption(DiplomacyTreatyType.ResetRelation, __instance);
                 break;
             case DiplomacyLevel.Normal when maxDiplomacyLevel > DiplomacyLevel.Normal:
-                if (!ModState.IsTreatyValid(playerFaction, otherFaction, DiplomacyTreatyType.Nap))
+                if (!ModState.IsTreatyValid(playerFaction, otherFaction, DiplomacyTreatyType.Nap) && !hasBrokenAlliance)
                     OfferTreatyOption(DiplomacyTreatyType.Nap, __instance);
                 break;
             case DiplomacyLevel.Friendly when maxDiplomacyLevel > DiplomacyLevel.Friendly:
-                if (!ModState.IsTreatyValid(playerFaction, otherFaction, DiplomacyTreatyType.Alliance))
+                if (!hasBrokenAlliance)
                     OfferTreatyOption(DiplomacyTreatyType.Alliance, __instance);
                 break;
             case DiplomacyLevel.Allied:
@@ -72,7 +79,10 @@ public class DiplomacyControllerPatch
     private static void EvaluateTradePostfix(DiplomacyController __instance)
     {
         // get rid of the normal "improve relations" item when using ResetRelation
-        if (ModState.CurrentTreatyType == DiplomacyTreatyType.ResetRelation)
+        if (ModState.CurrentTreatyType
+            is DiplomacyTreatyType.ResetRelation
+            or DiplomacyTreatyType.AllianceBroken
+            or DiplomacyTreatyType.Alliance)
             __instance.aiTableHateReductionItem.gameObject.SetActive(false);
     }
 

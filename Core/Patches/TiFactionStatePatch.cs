@@ -1,5 +1,4 @@
-﻿using System;
-using Diplomacy.Core.Helpers;
+﻿using Diplomacy.Core.Helpers;
 using Diplomacy.Core.Treaty;
 using HarmonyLib;
 using PavonisInteractive.TerraInvicta;
@@ -15,6 +14,9 @@ namespace Diplomacy.Core.Patches;
 [HarmonyPatch(typeof(TIFactionState))]
 public class TiFactionStatePatch
 {
+    // guard for possible cyclic intel update on alliances
+    private static volatile bool bAllyIntelUpdateInProgress;
+
     // NOTE: ProcessTrade is called twice from DiplomacyTradeAction.Execute (once for each trade side)
     [HarmonyPrefix]
     [HarmonyPatch(nameof(TIFactionState.ProcessTrade))]
@@ -28,12 +30,16 @@ public class TiFactionStatePatch
             return true;
 
         // ProcessTrade called once for every trade party, add it only once 
-        if (!ModState.IsTreatyValid(otherFaction, __instance, ModState.CurrentTreatyType))
+        var firstPass = !ModState.IsTreatyValid(otherFaction, __instance, ModState.CurrentTreatyType);
+        if (firstPass)
             ModState.AddTreaty(new DiplomacyTreaty(__instance, otherFaction, ModState.CurrentTreatyType));
 
         switch (ModState.CurrentTreatyType)
         {
             case DiplomacyTreatyType.ResetRelation:
+                if (firstPass)
+                    ModState.RemoveTruce(__instance, otherFaction);
+
                 // apply reset 
                 __instance.ResetRelations(otherFaction);
 
@@ -41,10 +47,34 @@ public class TiFactionStatePatch
                 tradeHateModifier = 0;
                 break;
             case DiplomacyTreatyType.Alliance:
-                throw new NotImplementedException();
+                // remove possible NAP
+                if (firstPass)
+                    ModState.RemoveNapTreaty(__instance, otherFaction);
+
+                // share intel for faction
+                __instance.SetIntelIfValueHigher(otherFaction, TemplateManager.global.intelToSeeFactionProjects);
+
+                // share all councilors intel
+                foreach (var councilor in otherFaction.councilors)
+                    __instance.SetIntelIfValueHigher(councilor, TemplateManager.global.intelToSeeCouncilorMission);
+
+                // share all known councilor of other factions
+                otherFaction.EnemyCouncilorsIHaveIntelOn(null).ForEach(
+                    councilor => __instance.SetIntelIfValueHigher(councilor, otherFaction.GetIntel(councilor))
+                );
+
+                // TODO: add more intel like space bodies, needs private access to "intel"
+
+                // reset modifier as it is not needed anymore for this treaty type
+                tradeHateModifier = 0;
                 break;
             case DiplomacyTreatyType.AllianceBroken:
-                throw new NotImplementedException();
+                // remove alliance treaty
+                if (firstPass)
+                    ModState.RemoveAllianceTreaty(__instance, otherFaction);
+
+                // after alliance was broken add hate
+                tradeHateModifier = -TemplateManager.global.factionHateConflictThreshold;
                 break;
             case DiplomacyTreatyType.Truce:
             case DiplomacyTreatyType.Nap:
@@ -53,6 +83,10 @@ public class TiFactionStatePatch
             default:
                 break;
         }
+
+        // done both passes, reset process of current treaty
+        if (!firstPass)
+            ModState.CurrentTreatyType = DiplomacyTreatyType.None;
 
         return true;
     }
@@ -87,5 +121,47 @@ public class TiFactionStatePatch
             theirScore *= 1.1f;
 
         return theirScore - myScore;
+    }
+
+    [HarmonyPostfix]
+    [HarmonyPatch(nameof(TIFactionState.permanentAlly))]
+    private static bool PermanentAllyPostfix(bool bPermanentAlly, TIFactionState faction, TIFactionState __instance)
+    {
+        if (bPermanentAlly)
+            return true;
+
+        if (!__instance.isActivePlayer && !faction.isActivePlayer)
+            return false;
+
+        return __instance.HasAllianceWith(faction);
+    }
+
+    [HarmonyPrefix]
+    [HarmonyPatch(nameof(TIFactionState.SetIntel))]
+    private static bool SetIntelPrefix(TIGameState intelTarget, float value, TIFactionState __instance)
+    {
+        // while setting up trade make sure to be able to set intel on those factions
+        if (ModState.CurrentTreatyType != DiplomacyTreatyType.None)
+            return true;
+
+        // if allied -> stop each others intel decay
+        if ((intelTarget.isFactionState || intelTarget.isCouncilorState) &&
+            __instance.HasAllianceWith(intelTarget.ref_faction))
+            return false;
+
+        // if gained intel and have allies, add it also to ally
+        if (bAllyIntelUpdateInProgress)
+        {
+            bAllyIntelUpdateInProgress = false;
+            return true;
+        }
+
+        foreach (var ally in __instance.GetAlliances())
+        {
+            bAllyIntelUpdateInProgress = true;
+            ally.SetIntelIfValueHigher(intelTarget, value);
+        }
+
+        return true;
     }
 }
