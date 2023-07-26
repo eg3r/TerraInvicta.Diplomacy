@@ -42,6 +42,7 @@ public class ModInit
     {
         ModClasses.ForEach(m => m.SetActive());
         _harmonyRef.PatchAll(Assembly.GetExecutingAssembly());
+        ModState.Load();
         UnityModManager.Logger.Log("Diplomacy Mod Activated.");
     }
 

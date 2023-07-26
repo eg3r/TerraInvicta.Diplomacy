@@ -1,4 +1,6 @@
-﻿using HarmonyLib;
+﻿using Diplomacy.Core.Helpers;
+using Diplomacy.Core.Treaty;
+using HarmonyLib;
 using PavonisInteractive.TerraInvicta;
 
 // ReSharper disable InconsistentNaming
@@ -25,27 +27,39 @@ public class DiplomacyControllerPatch
 
         var playerFaction = GameControl.control.activePlayer;
         var otherFaction = __instance.tradingFaction;
-        var maxDipLvl = playerFaction.MaxDiplomacyLevelWith(otherFaction);
-        var currentDipLevel = playerFaction.CurrentDiplomacyLevelWith(otherFaction);
 
-        switch (currentDipLevel)
+        // apply cooldown of treaties 
+        var latestTreaty = playerFaction.GetLatestActiveTreaty(otherFaction);
+        if (latestTreaty != null &&
+            TITimeState.CampaignDuration_days() - latestTreaty.TreatyGameDay < ModState.MinDaysBetweenTreaties)
+            return;
+
+        var hasBrokenAlliance = playerFaction.HasBrokenAlliance(otherFaction);
+        var maxDiplomacyLevel = playerFaction.MaxDiplomacyLevelWith(otherFaction);
+        var currentDiplomacyLevel = playerFaction.CurrentDiplomacyLevelWith(otherFaction);
+
+        switch (currentDiplomacyLevel)
         {
-            case DiplomacyLevel.War when maxDipLvl > DiplomacyLevel.War:
+            case DiplomacyLevel.War when maxDiplomacyLevel > DiplomacyLevel.War:
                 if (!ModState.IsTreatyValid(playerFaction, otherFaction, DiplomacyTreatyType.Truce))
                     OfferTreatyOption(DiplomacyTreatyType.Truce, __instance);
                 break;
-            case DiplomacyLevel.Enemy when maxDipLvl > DiplomacyLevel.Enemy:
-            case DiplomacyLevel.Conflict when maxDipLvl > DiplomacyLevel.Conflict:
-            case DiplomacyLevel.Normal when maxDipLvl > DiplomacyLevel.Normal:
-                if (!ModState.IsTreatyValid(playerFaction, otherFaction, DiplomacyTreatyType.ResetRelation))
+            case DiplomacyLevel.Enemy when maxDiplomacyLevel > DiplomacyLevel.Conflict:
+            case DiplomacyLevel.Conflict when maxDiplomacyLevel > DiplomacyLevel.Conflict:
+                var hasReset = ModState.IsTreatyValid(playerFaction, otherFaction, DiplomacyTreatyType.ResetRelation);
+                if (!hasReset && !hasBrokenAlliance)
                     OfferTreatyOption(DiplomacyTreatyType.ResetRelation, __instance);
                 break;
-            case DiplomacyLevel.Friendly when maxDipLvl > DiplomacyLevel.Conflict:
-                if (!ModState.IsTreatyValid(playerFaction, otherFaction, DiplomacyTreatyType.Nap))
+            case DiplomacyLevel.Normal when maxDiplomacyLevel > DiplomacyLevel.Normal:
+                if (!ModState.IsTreatyValid(playerFaction, otherFaction, DiplomacyTreatyType.Nap) && !hasBrokenAlliance)
                     OfferTreatyOption(DiplomacyTreatyType.Nap, __instance);
                 break;
+            case DiplomacyLevel.Friendly when maxDiplomacyLevel > DiplomacyLevel.Friendly:
+                if (!hasBrokenAlliance)
+                    OfferTreatyOption(DiplomacyTreatyType.Alliance, __instance);
+                break;
             case DiplomacyLevel.Allied:
-            default:
+                OfferTreatyOption(DiplomacyTreatyType.AllianceBroken, __instance);
                 break;
         }
     }
@@ -65,7 +79,10 @@ public class DiplomacyControllerPatch
     private static void EvaluateTradePostfix(DiplomacyController __instance)
     {
         // get rid of the normal "improve relations" item when using ResetRelation
-        if (ModState.CurrentTreatyType == DiplomacyTreatyType.ResetRelation)
+        if (ModState.CurrentTreatyType
+            is DiplomacyTreatyType.ResetRelation
+            or DiplomacyTreatyType.AllianceBroken
+            or DiplomacyTreatyType.Alliance)
             __instance.aiTableHateReductionItem.gameObject.SetActive(false);
     }
 
@@ -92,6 +109,18 @@ public class DiplomacyControllerPatch
             case DiplomacyTreatyType.ResetRelation:
                 text = Loc.T("TIDiplomacy.UI.Notifications.ResetRelations");
                 description = Loc.T("TIDiplomacy.UI.Notifications.ResetRelationsDescription");
+                diplomacyController.aiTableTreatyItem.TreatyTruce = false;
+                diplomacyController.aiTableTreatyItem.TreatyNAP = false;
+                break;
+            case DiplomacyTreatyType.Alliance:
+                text = Loc.T("TIDiplomacy.UI.Notifications.Alliance");
+                description = Loc.T("TIDiplomacy.UI.Notifications.AllianceDescription");
+                diplomacyController.aiTableTreatyItem.TreatyTruce = false;
+                diplomacyController.aiTableTreatyItem.TreatyNAP = false;
+                break;
+            case DiplomacyTreatyType.AllianceBroken:
+                text = Loc.T("TIDiplomacy.UI.Notifications.BreakAlliance");
+                description = Loc.T("TIDiplomacy.UI.Notifications.BreakAllianceDescription");
                 diplomacyController.aiTableTreatyItem.TreatyTruce = false;
                 diplomacyController.aiTableTreatyItem.TreatyNAP = false;
                 break;

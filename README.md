@@ -4,11 +4,22 @@ A mod for Terra Invicta aimed at improving player experience regarding Relations
 
 ## Features
 
-* New Diplomacy/Trade treaty `Reset Bilateral Relations`. An agreement to restart bilateral relations between
+### New Diplomatic Treaties:
+
+* `Alliance` - Agreement that makes both factions allied to each other, share intel and prevents hostile actions against
+  each other.
+* `Break Alliance` - Valid if in an alliance, breaks up the alliance.
+* `Reset Bilateral Relations` - Agreement to restart bilateral relations between
   factions. Sets both parties hate towards each other to the default game start values.
-* When `PlayerFaction` was far ahead, certain treaties like `Truce` or `NAP` could not be made, this was removed and a
-  new system put in place to decide when those treaties are available.
-* Saves data separate from game saves and thus is absolutely save game compatible after removal.
+
+### Changes to base game:
+
+* In the base game, when `PlayerFaction` is far ahead, certain treaties like `Truce` or `NAP` can not be made, a
+  different approach is used in this mod - treaties are available based on current "relations" and ideology of factions.
+
+### Misc:
+
+* Save compatible after mod removal or game update.
 
 ## Upcoming Features
 
@@ -28,9 +39,9 @@ A mod for Terra Invicta aimed at improving player experience regarding Relations
 
 ## Uninstall (Manual)
 
-* Remove the `TerraInvicta.Diplomacy` folder in your game mods folders.
+* Remove the `TerraInvicta.Diplomacy` folder in your game mod folder.
 * _(optional) Any data saved by the mod can be removed by removing the folder `DiplomacyModSaves` in the save-game
-  folder_
+  folder._
 
 ### FAQ
 
@@ -40,10 +51,10 @@ A mod for Terra Invicta aimed at improving player experience regarding Relations
     * This mod can be removed without any problems
 * Where do I find the save-game folder?
     * Usually under `<MyDocuments>\My Games\TerraInvicta\Saves`
-* What are the possible relations for factions? 
-    * Max relations are based on each factions ideology (e.g. alien friends can't be allied with alien haters). Max relations overview:
-![relations_grid_ti](https://github.com/eg3r/TerraInvicta.Diplomacy/assets/41837307/8c07ba49-343c-4324-a423-2c4e26f806ca)
-
+* What are the possible relations for factions?
+    * Max relations are based on each factions ideology (e.g. alien friends can't be allied with alien haters). Max
+      relations overview:
+      ![relations_grid_ti](https://github.com/eg3r/TerraInvicta.Diplomacy/assets/41837307/8c07ba49-343c-4324-a423-2c4e26f806ca)
 
 ### Contribution
 
