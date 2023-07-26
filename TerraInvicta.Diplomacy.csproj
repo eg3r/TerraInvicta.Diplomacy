@@ -8,16 +8,16 @@
         <LangVersion>11</LangVersion>
         <Company>TerraInvicta.Diplomacy</Company>
         <Product>TerraInvicta.Diplomacy</Product>
-        <AssemblyVersion>1.1.0</AssemblyVersion>
-        <FileVersion>1.1.0</FileVersion>
+        <AssemblyVersion>1.2.1</AssemblyVersion>
+        <FileVersion>1.2.1</FileVersion>
         <PackageId>TerraInvicta.Diplomacy</PackageId>
         <Authors>3ger</Authors>
         <RootNamespace>Diplomacy</RootNamespace>
         <Platforms>AnyCPU;x64</Platforms>
         <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
-        <ApplicationIcon/>
+        <ApplicationIcon />
         <OutputType>Library</OutputType>
-        <StartupObject/>
+        <StartupObject />
     </PropertyGroup>
 
     <PropertyGroup Condition=" '$(Configuration)' == 'Release' ">
@@ -25,7 +25,7 @@
     </PropertyGroup>
 
     <ItemGroup Condition="'$(TargetFramework.TrimEnd(`0123456789`))' == 'net'">
-        <PackageReference Include="Microsoft.NETFramework.ReferenceAssemblies" Version="1.0.2" PrivateAssets="all"/>
+        <PackageReference Include="Microsoft.NETFramework.ReferenceAssemblies" Version="1.0.2" PrivateAssets="all" />
     </ItemGroup>
 
     <ItemGroup>
@@ -64,9 +64,9 @@
     <!--    </Target>-->
 
     <Target Name="PostBuild" AfterTargets="PostBuildEvent">
-        <Copy SourceFiles="$(ProjectDir)ModData\ModInfo.json" DestinationFiles="$(TERRAINVICTA_PATH)\Mods\Enabled\$(ProjectName)\ModInfo.json" OverwriteReadOnlyFiles="true"/>
-        <Copy SourceFiles="$(TargetDir)$(ProjectName).dll" DestinationFiles="$(TERRAINVICTA_PATH)\Mods\Enabled\$(ProjectName)\$(ProjectName).dll" OverwriteReadOnlyFiles="true"/>
-        <Copy SourceFiles="$(TargetDir)$(ProjectName).pdb" DestinationFiles="$(TERRAINVICTA_PATH)\Mods\Enabled\$(ProjectName)\$(ProjectName).pdb" OverwriteReadOnlyFiles="true"/>
-        <Copy SourceFiles="$(ProjectDir)ModData\Localization\en\TIDiplomacy.en.txt" DestinationFiles="$(TERRAINVICTA_PATH)\Mods\Enabled\$(ProjectName)\Localization\en\TIDiplomacy.en" OverwriteReadOnlyFiles="true"/>
+        <Copy SourceFiles="$(ProjectDir)ModData\ModInfo.json" DestinationFiles="$(TERRAINVICTA_PATH)\Mods\Enabled\$(ProjectName)\ModInfo.json" OverwriteReadOnlyFiles="true" />
+        <Copy SourceFiles="$(TargetDir)$(ProjectName).dll" DestinationFiles="$(TERRAINVICTA_PATH)\Mods\Enabled\$(ProjectName)\$(ProjectName).dll" OverwriteReadOnlyFiles="true" />
+        <Copy SourceFiles="$(TargetDir)$(ProjectName).pdb" DestinationFiles="$(TERRAINVICTA_PATH)\Mods\Enabled\$(ProjectName)\$(ProjectName).pdb" OverwriteReadOnlyFiles="true" />
+        <Copy SourceFiles="$(ProjectDir)ModData\Localization\en\TIDiplomacy.en.txt" DestinationFiles="$(TERRAINVICTA_PATH)\Mods\Enabled\$(ProjectName)\Localization\en\TIDiplomacy.en" OverwriteReadOnlyFiles="true" />
     </Target>
 </Project>
