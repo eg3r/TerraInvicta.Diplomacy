@@ -1,4 +1,7 @@
-﻿using HarmonyLib;
+﻿using System;
+using Diplomacy.Core.Helpers;
+using Diplomacy.Core.Treaty;
+using HarmonyLib;
 using PavonisInteractive.TerraInvicta;
 
 // ReSharper disable UnusedMember.Local
@@ -37,9 +40,16 @@ public class TiFactionStatePatch
                 // reset modifier as it is not needed anymore for this treaty type
                 tradeHateModifier = 0;
                 break;
+            case DiplomacyTreatyType.Alliance:
+                throw new NotImplementedException();
+                break;
+            case DiplomacyTreatyType.AllianceBroken:
+                throw new NotImplementedException();
+                break;
             case DiplomacyTreatyType.Truce:
             case DiplomacyTreatyType.Nap:
             case DiplomacyTreatyType.None:
+
             default:
                 break;
         }
@@ -76,6 +86,6 @@ public class TiFactionStatePatch
         if (receivingFaction.malleable)
             theirScore *= 1.1f;
 
-        return theirScore - myScore + hateDelta;
+        return theirScore - myScore;
     }
 }

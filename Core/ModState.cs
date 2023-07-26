@@ -1,14 +1,16 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
+using Diplomacy.Core.Treaty;
 using PavonisInteractive.TerraInvicta;
 
 namespace Diplomacy.Core;
 
 public static class ModState
 {
-    public const int ResetRelationsTreatyValidDays = 360; // TODO: move into settings
-    public const int NapTreatyValidDays = 360; // TODO: move into settings
-    public const int TruceTreatyValidDays = 360; // TODO: move into settings
+    public const int ResetRelationsTreatyValidDays = 365 * 2; // TODO: move into settings
+    public const int NapTreatyRepeatDays = 365 * 5; // TODO: move into settings
+    public const int TruceTreatyRepeatDays = 365 * 2; // TODO: move into settings
+    public const int AllianceBrokenValidDays = 365 * 2; // TODO: move into settings
 
     private static InnerState _innerState = new();
 
@@ -16,7 +18,7 @@ public static class ModState
 
     public static DiplomacyTreatyType CurrentTreatyType { get; set; } = DiplomacyTreatyType.None;
 
-    public static string CurrentLoadedSave { get; private set; }
+    private static string CurrentLoadedSave { get; set; }
 
     public static void AddTreaty(DiplomacyTreaty treaty)
     {
@@ -26,7 +28,10 @@ public static class ModState
     public static bool IsTreatyValid(TIFactionState faction, TIFactionState other, DiplomacyTreatyType type)
     {
         var treaty = Treaties.FirstOrDefault(t =>
-            t.GetInitiator() == faction && t.GetOther() == other && t.TreatyType == type);
+            ((t.GetInitiator() == faction && t.GetOther() == other)
+             || (t.GetInitiator() == other && t.GetOther() == faction))
+            && t.TreatyType == type);
+
         if (treaty == null)
             return false;
 
@@ -42,13 +47,19 @@ public static class ModState
     {
         CurrentTreatyType = DiplomacyTreatyType.None;
         Treaties.Clear();
+        _innerState = new InnerState();
     }
 
-    public static void Load(string saveName)
+    public static void Load(string saveName = "")
     {
+        if (string.IsNullOrEmpty(saveName))
+            saveName = CurrentLoadedSave;
+
+        if (string.IsNullOrEmpty(saveName) || !SaveSystem.SaveExists(saveName))
+            return;
+
+        _innerState = SaveSystem.Load<InnerState>(saveName);
         CurrentLoadedSave = saveName;
-        if (SaveSystem.SaveExists(saveName))
-            _innerState = SaveSystem.Load<InnerState>(saveName);
     }
 
     public static void Save(string saveName)

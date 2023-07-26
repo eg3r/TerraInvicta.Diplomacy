@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using Diplomacy.Core.Treaty;
 using Newtonsoft.Json;
 
 namespace Diplomacy.Core;
