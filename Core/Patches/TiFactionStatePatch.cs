@@ -130,6 +130,9 @@ public class TiFactionStatePatch
         if (bPermanentAlly)
             return true;
 
+        if (faction == null || __instance == null)
+            return false;
+
         if (!__instance.isActivePlayer && !faction.isActivePlayer)
             return false;
 
