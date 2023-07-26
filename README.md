@@ -40,6 +40,10 @@ A mod for Terra Invicta aimed at improving player experience regarding Relations
     * This mod can be removed without any problems
 * Where do I find the save-game folder?
     * Usually under `<MyDocuments>\My Games\TerraInvicta\Saves`
+* What are the possible relations for factions? 
+    * Max relations are based on each factions ideology (e.g. alien friends can't be allied with alien haters). Max relations overview:
+![relations_grid_ti](https://github.com/eg3r/TerraInvicta.Diplomacy/assets/41837307/8c07ba49-343c-4324-a423-2c4e26f806ca)
+
 
 ### Contribution
 
