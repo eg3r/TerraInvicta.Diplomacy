@@ -1,6 +1,8 @@
-﻿using Diplomacy.Core.Helpers;
+﻿using System.Linq;
+using Diplomacy.Core.Helpers;
 using Diplomacy.Core.Treaty;
 using HarmonyLib;
+using ModestTree;
 using PavonisInteractive.TerraInvicta;
 
 // ReSharper disable UnusedMember.Local
@@ -62,6 +64,10 @@ public class TiFactionStatePatch
                 otherFaction.EnemyCouncilorsIHaveIntelOn(null).ForEach(
                     councilor => __instance.SetIntelIfValueHigher(councilor, otherFaction.GetIntel(councilor))
                 );
+
+                // share intel for all known factions
+                GameStateManager.AllFactions().Where(f => f != __instance && f != otherFaction)
+                    .ForEach(faction => __instance.SetIntelIfValueHigher(faction, otherFaction.GetIntel(faction)));
 
                 // TODO: add more intel like space bodies, needs private access to "intel"
 
