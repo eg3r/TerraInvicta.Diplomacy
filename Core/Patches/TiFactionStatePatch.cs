@@ -173,4 +173,12 @@ public class TiFactionStatePatch
 
         return true;
     }
+
+    [HarmonyPostfix]
+    [HarmonyPatch(nameof(TIFactionState.AddAvailableCouncilor))]
+    private static void AddAvailableCouncilorPostfix(TICouncilorState councilor, TIFactionState __instance)
+    {
+        __instance.GetAlliances().ForEach(faction =>
+            faction.SetIntelIfValueHigher(councilor, TemplateManager.global.intelToSeeCouncilorMission));
+    }
 }
