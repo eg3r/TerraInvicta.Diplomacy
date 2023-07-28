@@ -1,4 +1,5 @@
-﻿using System.Linq;
+﻿using System.Collections.Generic;
+using System.Linq;
 using Diplomacy.Core.Helpers;
 using Diplomacy.Core.Treaty;
 using HarmonyLib;
@@ -180,5 +181,33 @@ public class TiFactionStatePatch
     {
         __instance.GetAlliances().ForEach(faction =>
             faction.SetIntelIfValueHigher(councilor, TemplateManager.global.intelToSeeCouncilorMission));
+    }
+
+    [HarmonyPrefix]
+    [HarmonyPatch(nameof(TIFactionState.StealableProjects))]
+    private static bool StealableProjectsPrefix(
+        TIFactionState stealingFaction,
+        ref List<TIProjectTemplate> __result,
+        TIFactionState __instance)
+    {
+        if (!__instance.HasAllianceWith(stealingFaction))
+            return true;
+
+        __result = new List<TIProjectTemplate>();
+        return false;
+    }
+
+    [HarmonyPrefix]
+    [HarmonyPatch(nameof(TIFactionState.ProjectsVulnerableToSabotage))]
+    private static bool ProjectsVulnerableToSabotagePrefix(
+        TIFactionState sabotagingFaction,
+        ref List<TIProjectTemplate> __result,
+        TIFactionState __instance)
+    {
+        if (!__instance.HasAllianceWith(sabotagingFaction))
+            return true;
+
+        __result = new List<TIProjectTemplate>();
+        return false;
     }
 }
