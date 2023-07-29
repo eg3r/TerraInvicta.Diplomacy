@@ -8,8 +8,8 @@
         <LangVersion>11</LangVersion>
         <Company>TerraInvicta.Diplomacy</Company>
         <Product>TerraInvicta.Diplomacy</Product>
-        <AssemblyVersion>1.2.5</AssemblyVersion>
-        <FileVersion>1.2.5</FileVersion>
+        <AssemblyVersion>1.2.6</AssemblyVersion>
+        <FileVersion>1.2.6</FileVersion>
         <PackageId>TerraInvicta.Diplomacy</PackageId>
         <Authors>3ger</Authors>
         <RootNamespace>Diplomacy</RootNamespace>
