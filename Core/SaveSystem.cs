@@ -67,4 +67,13 @@ public static class SaveSystem
     {
         File.Delete(GetSavePath(saveName, useDefaultFileEnding));
     }
+
+    public static void MoveSave(string fromSaveName, string toSaveName, bool useDefaultFileEnding = true)
+    {
+        if (SaveExists(toSaveName))
+            DeleteSave(toSaveName);
+
+        if (SaveExists(fromSaveName))
+            File.Move(GetSavePath(fromSaveName, useDefaultFileEnding), GetSavePath(toSaveName, useDefaultFileEnding));
+    }
 }
