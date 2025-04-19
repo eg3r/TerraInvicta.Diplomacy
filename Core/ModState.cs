@@ -13,6 +13,9 @@ public static class ModState
     public const int AllianceBrokenValidDays = 365 * 2; // TODO: move into settings
     public const int MinDaysBetweenTreaties = 90; // TODO: move into settings
 
+    // TODO: move to settings, ATTENTION NEEDS PATCHING TO SUPPORT OFFICIAL: TIMissionPhaseState.StartNewMissionPhase
+    public const int NumberAutosaves = 3;
+
     private static InnerState _innerState = new();
 
     private static List<DiplomacyTreaty> Treaties => _innerState.Treaties;
@@ -82,9 +85,9 @@ public static class ModState
         CurrentLoadedSave = saveName;
     }
 
-    public static void Save(string saveName)
+    public static bool Save(string saveName)
     {
-        SaveSystem.Save(_innerState, saveName);
+        return SaveSystem.Save(_innerState, saveName);
     }
 
     private static void RemoveTreaty(DiplomacyTreaty treaty)

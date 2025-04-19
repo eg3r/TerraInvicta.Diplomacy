@@ -1,14 +1,18 @@
 {
   "Id": "TerraInvicta.Diplomacy",
   "DisplayName": "Diplomacy Mod",
-  "Title": "TerraInvicta.Diplomacy",
-  "Author": "eg3r",
-  "Version": "1.1.0",
+  "title": "TerraInvicta.Diplomacy",
+  "author": "eg3r",
+  "Version": "1.2.6",
   "Requirements": [],
   "ManagerVersion": "0.25.0.0",
   "AssemblyName": "TerraInvicta.Diplomacy.dll",
   "EntryMethod": "Diplomacy.ModInit.Load",
   "ModURL": "https://github.com/eg3r/TerraInvicta.Diplomacy",
   "HomePage": "https://www.nexusmods.com/terrainvicta/mods/31",
-  "Description": "A mod for Terra Invicta aimed at improving player experience regarding Relations and Diplomacy between Factions."
+  "description": "A mod for Terra Invicta aimed at improving player experience regarding Relations and Diplomacy between Factions.",
+  "mod url": "https://steamcommunity.com/sharedfiles/filedetails/?id=3010135704",
+  "LoadOrder": 0,
+  "TemplatesToConcatArrays": [],
+  "TemplatesToReplace": []
 }

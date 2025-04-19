@@ -20,6 +20,7 @@ A mod for Terra Invicta aimed at improving player experience regarding Relations
 ### Misc:
 
 * Save compatible after mod removal or game update.
+* Works with ongoing saves.
 
 ## Upcoming Features
 

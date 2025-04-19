@@ -36,7 +36,20 @@ public class GameStateManagerPatch
         try // make sure not to fail upwards chain if saved main save
         {
             var saveName = Path.GetFileNameWithoutExtension(filepath);
-            ModState.Save(saveName);
+
+            // in case of autosave we actually don't know what number we have here, only "autosave" is passed down
+            // so we need to iterate it to the end
+            if (saveName.Equals(Path.GetFileNameWithoutExtension(StartMenuController.autoSaveFilepath),
+                    StringComparison.OrdinalIgnoreCase))
+                for (var i = ModState.NumberAutosaves; i > 1; i--)
+                {
+                    var autosavePath = saveName + i;
+                    // first autosave starts without number ??
+                    var prevAutosave = saveName + (i == 2 ? "" : i - 1);
+                    SaveSystem.MoveSave(prevAutosave, autosavePath);
+                }
+
+            _ = ModState.Save(saveName);
         }
         catch (Exception)
         {

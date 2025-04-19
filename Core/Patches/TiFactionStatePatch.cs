@@ -1,6 +1,9 @@
-﻿using Diplomacy.Core.Helpers;
+﻿using System.Collections.Generic;
+using System.Linq;
+using Diplomacy.Core.Helpers;
 using Diplomacy.Core.Treaty;
 using HarmonyLib;
+using ModestTree;
 using PavonisInteractive.TerraInvicta;
 
 // ReSharper disable UnusedMember.Local
@@ -63,6 +66,10 @@ public class TiFactionStatePatch
                     councilor => __instance.SetIntelIfValueHigher(councilor, otherFaction.GetIntel(councilor))
                 );
 
+                // share intel for all known factions
+                GameStateManager.AllFactions().Where(f => f != __instance && f != otherFaction)
+                    .ForEach(faction => __instance.SetIntelIfValueHigher(faction, otherFaction.GetIntel(faction)));
+
                 // TODO: add more intel like space bodies, needs private access to "intel"
 
                 // reset modifier as it is not needed anymore for this treaty type
@@ -76,6 +83,7 @@ public class TiFactionStatePatch
                 // after alliance was broken add hate
                 tradeHateModifier = -TemplateManager.global.factionHateConflictThreshold;
                 break;
+            case DiplomacyTreatyType.Intel:
             case DiplomacyTreatyType.Truce:
             case DiplomacyTreatyType.Nap:
             case DiplomacyTreatyType.None:
@@ -130,6 +138,9 @@ public class TiFactionStatePatch
         if (bPermanentAlly)
             return true;
 
+        if (faction == null || __instance == null)
+            return false;
+
         if (!__instance.isActivePlayer && !faction.isActivePlayer)
             return false;
 
@@ -163,5 +174,41 @@ public class TiFactionStatePatch
         }
 
         return true;
+    }
+
+    [HarmonyPostfix]
+    [HarmonyPatch(nameof(TIFactionState.AddAvailableCouncilor))]
+    private static void AddAvailableCouncilorPostfix(TICouncilorState councilor, TIFactionState __instance)
+    {
+        __instance.GetAlliances().ForEach(faction =>
+            faction.SetIntelIfValueHigher(councilor, TemplateManager.global.intelToSeeCouncilorMission));
+    }
+
+    [HarmonyPrefix]
+    [HarmonyPatch(nameof(TIFactionState.StealableProjects))]
+    private static bool StealableProjectsPrefix(
+        TIFactionState stealingFaction,
+        ref List<TIProjectTemplate> __result,
+        TIFactionState __instance)
+    {
+        if (!__instance.HasAllianceWith(stealingFaction))
+            return true;
+
+        __result = new List<TIProjectTemplate>();
+        return false;
+    }
+
+    [HarmonyPrefix]
+    [HarmonyPatch(nameof(TIFactionState.ProjectsVulnerableToSabotage))]
+    private static bool ProjectsVulnerableToSabotagePrefix(
+        TIFactionState sabotagingFaction,
+        ref List<TIProjectTemplate> __result,
+        TIFactionState __instance)
+    {
+        if (!__instance.HasAllianceWith(sabotagingFaction))
+            return true;
+
+        __result = new List<TIProjectTemplate>();
+        return false;
     }
 }
