@@ -83,6 +83,7 @@ public class TiFactionStatePatch
                 // after alliance was broken add hate
                 tradeHateModifier = -TemplateManager.global.factionHateConflictThreshold;
                 break;
+            case DiplomacyTreatyType.Intel:
             case DiplomacyTreatyType.Truce:
             case DiplomacyTreatyType.Nap:
             case DiplomacyTreatyType.None:

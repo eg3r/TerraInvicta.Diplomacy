@@ -97,32 +97,32 @@ public class DiplomacyControllerPatch
             case DiplomacyTreatyType.Truce:
                 text = Loc.T("UI.Notifications.Diplomacy.Truce");
                 description = Loc.T("UI.Notifications.Diplomacy.TruceDesc", 12);
-                diplomacyController.aiTableTreatyItem.TreatyTruce = true;
-                diplomacyController.aiTableTreatyItem.TreatyNAP = false;
+                diplomacyController.aiTableTreatyItem.treaty = TradeOffer.TreatyType.Truce;
                 break;
             case DiplomacyTreatyType.Nap:
                 text = Loc.T("UI.Notifications.Diplomacy.NAP");
                 description = Loc.T("UI.Notifications.Diplomacy.NAPDesc");
-                diplomacyController.aiTableTreatyItem.TreatyTruce = false;
-                diplomacyController.aiTableTreatyItem.TreatyNAP = true;
+                diplomacyController.aiTableTreatyItem.treaty = TradeOffer.TreatyType.NAP;
                 break;
             case DiplomacyTreatyType.ResetRelation:
                 text = Loc.T("TIDiplomacy.UI.Notifications.ResetRelations");
                 description = Loc.T("TIDiplomacy.UI.Notifications.ResetRelationsDescription");
-                diplomacyController.aiTableTreatyItem.TreatyTruce = false;
-                diplomacyController.aiTableTreatyItem.TreatyNAP = false;
+                diplomacyController.aiTableTreatyItem.treaty = TradeOffer.TreatyType.None;
+                break;
+            case DiplomacyTreatyType.Intel:
+                text = Loc.T("TIDiplomacy.UI.Notifications.Intel");
+                description = Loc.T("TIDiplomacy.UI.Notifications.Intel");
+                diplomacyController.aiTableTreatyItem.treaty = TradeOffer.TreatyType.Intel;
                 break;
             case DiplomacyTreatyType.Alliance:
                 text = Loc.T("TIDiplomacy.UI.Notifications.Alliance");
                 description = Loc.T("TIDiplomacy.UI.Notifications.AllianceDescription");
-                diplomacyController.aiTableTreatyItem.TreatyTruce = false;
-                diplomacyController.aiTableTreatyItem.TreatyNAP = false;
+                diplomacyController.aiTableTreatyItem.treaty = TradeOffer.TreatyType.None;
                 break;
             case DiplomacyTreatyType.AllianceBroken:
                 text = Loc.T("TIDiplomacy.UI.Notifications.BreakAlliance");
                 description = Loc.T("TIDiplomacy.UI.Notifications.BreakAllianceDescription");
-                diplomacyController.aiTableTreatyItem.TreatyTruce = false;
-                diplomacyController.aiTableTreatyItem.TreatyNAP = false;
+                diplomacyController.aiTableTreatyItem.treaty = TradeOffer.TreatyType.None;
                 break;
         }
 

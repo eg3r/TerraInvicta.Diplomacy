@@ -13,7 +13,7 @@ using PavonisInteractive.TerraInvicta;
 namespace Diplomacy.Core.Patches;
 
 [HarmonyPatch(typeof(TICouncilorState))]
-public class TICouncilorStatePath
+public class TICouncilorStatePatch
 {
     [HarmonyPrefix]
     [HarmonyPatch(nameof(TICouncilorState.GetStealableOrgs))]
