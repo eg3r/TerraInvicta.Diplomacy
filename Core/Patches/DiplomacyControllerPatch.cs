@@ -53,6 +53,9 @@ public class DiplomacyControllerPatch
             case DiplomacyLevel.Normal when maxDiplomacyLevel > DiplomacyLevel.Normal:
                 if (!ModState.IsTreatyValid(playerFaction, otherFaction, DiplomacyTreatyType.Nap) && !hasBrokenAlliance)
                     OfferTreatyOption(DiplomacyTreatyType.Nap, __instance);
+                // TODO: investigate if offering IntelSharing is correct here
+                else if (!ModState.IsTreatyValid(playerFaction, otherFaction, DiplomacyTreatyType.Intel) && !hasBrokenAlliance)
+                    OfferTreatyOption(DiplomacyTreatyType.Intel, __instance);
                 break;
             case DiplomacyLevel.Friendly when maxDiplomacyLevel > DiplomacyLevel.Friendly:
                 if (!hasBrokenAlliance)
@@ -82,7 +85,8 @@ public class DiplomacyControllerPatch
         if (ModState.CurrentTreatyType
             is DiplomacyTreatyType.ResetRelation
             or DiplomacyTreatyType.AllianceBroken
-            or DiplomacyTreatyType.Alliance)
+            or DiplomacyTreatyType.Alliance
+            or DiplomacyTreatyType.Intel)
             __instance.aiTableHateReductionItem.gameObject.SetActive(false);
     }
 

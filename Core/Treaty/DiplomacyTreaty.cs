@@ -57,16 +57,20 @@ public class DiplomacyTreaty
                 return TITimeState.CampaignDuration_days() - _treatyGameDay < ModState.ResetRelationsTreatyValidDays;
             case DiplomacyTreatyType.Nap:
                 return GetInitiator().HasNap(GetOther())
-                       // prevents repeat before max duration
-                       || TITimeState.CampaignDuration_days() - _treatyGameDay < ModState.NapTreatyRepeatDays;
+                        // prevents repeat before max duration
+                        || TITimeState.CampaignDuration_days() - _treatyGameDay < ModState.NapTreatyRepeatDays;
             case DiplomacyTreatyType.Truce:
                 return GetInitiator().HasTruce(GetOther())
-                       // prevents repeat before max duration
-                       || TITimeState.CampaignDuration_days() - _treatyGameDay < ModState.TruceTreatyRepeatDays;
+                        // prevents repeat before max duration
+                        || TITimeState.CampaignDuration_days() - _treatyGameDay < ModState.TruceTreatyRepeatDays;
             case DiplomacyTreatyType.Alliance:
                 return true; // alliance does not run out, can only be broken atm.
             case DiplomacyTreatyType.AllianceBroken:
                 return TITimeState.CampaignDuration_days() - _treatyGameDay < ModState.AllianceBrokenValidDays;
+            case DiplomacyTreatyType.Intel:
+                return GetInitiator().intelSharingFactions.Contains(GetOther())
+                        // prevents repeat before max duration
+                        || TITimeState.CampaignDuration_days() - _treatyGameDay < ModState.IntelSharingRepeatDays;
             case DiplomacyTreatyType.None:
             default:
                 return false;

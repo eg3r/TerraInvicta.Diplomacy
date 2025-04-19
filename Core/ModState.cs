@@ -11,6 +11,7 @@ public static class ModState
     public const int NapTreatyRepeatDays = 365 * 5; // TODO: move into settings
     public const int TruceTreatyRepeatDays = 365 * 2; // TODO: move into settings
     public const int AllianceBrokenValidDays = 365 * 2; // TODO: move into settings
+    public const int IntelSharingRepeatDays = 365 * 1; // TODO: move into settings & Investigate if 1 year is correct repeat time for intel sharing
     public const int MinDaysBetweenTreaties = 90; // TODO: move into settings
 
     // TODO: move to settings, ATTENTION NEEDS PATCHING TO SUPPORT OFFICIAL: TIMissionPhaseState.StartNewMissionPhase
@@ -119,11 +120,11 @@ public static class ModState
     public static DiplomacyTreaty GetLatestTreatyBetween(TIFactionState faction, TIFactionState other)
     {
         return (from t in Treaties
-            where ((t.GetInitiator() == faction && t.GetOther() == other) ||
-                   (t.GetInitiator() == other && t.GetOther() == faction))
-                  && t.IsValid
-            orderby t.TreatyGameDay descending
-            select t).FirstOrDefault();
+                where ((t.GetInitiator() == faction && t.GetOther() == other) ||
+                       (t.GetInitiator() == other && t.GetOther() == faction))
+                      && t.IsValid
+                orderby t.TreatyGameDay descending
+                select t).FirstOrDefault();
     }
 
     public static List<TIFactionState> GetAlliancesFor(TIFactionState faction)
