@@ -10,5 +10,5 @@ public enum DiplomacyLevel
     Conflict = -1,
     Normal = 0,
     Friendly = 1,
-    Allied = 2
+    Allied = 2,
 }
