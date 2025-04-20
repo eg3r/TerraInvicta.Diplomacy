@@ -96,8 +96,7 @@ public static class FactionHelper
         if (faction.permanentAlly(other))
             return DiplomacyLevel.Allied;
 
-        // TODO: investigate intel sharing system and adjust if needed, for not intelsharing = friendly
-        if (faction.HasNap(other) || faction.intelSharingFactions.Contains(other))
+        if (faction.HasNap(other) || faction.IsIntelSharedBy(other) || other.IsIntelSharedBy(faction))
             return DiplomacyLevel.Friendly;
 
         var maxDipLevel = faction.MaxDiplomacyLevelWith(other);
