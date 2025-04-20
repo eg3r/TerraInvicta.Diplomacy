@@ -41,28 +41,46 @@ public class DiplomacyControllerPatch
         switch (currentDiplomacyLevel)
         {
             case DiplomacyLevel.War when maxDiplomacyLevel > DiplomacyLevel.War:
+
                 if (!ModState.IsTreatyValid(playerFaction, otherFaction, DiplomacyTreatyType.Truce))
-                    OfferTreatyOption(DiplomacyTreatyType.Truce, __instance);
+                    UnlockTreatyOption(DiplomacyTreatyType.Truce, __instance);
+
                 break;
             case DiplomacyLevel.Enemy when maxDiplomacyLevel > DiplomacyLevel.Conflict:
             case DiplomacyLevel.Conflict when maxDiplomacyLevel > DiplomacyLevel.Conflict:
-                var hasReset = ModState.IsTreatyValid(playerFaction, otherFaction, DiplomacyTreatyType.ResetRelation);
-                if (!hasReset && !hasBrokenAlliance)
-                    OfferTreatyOption(DiplomacyTreatyType.ResetRelation, __instance);
-                break;
-            case DiplomacyLevel.Normal when maxDiplomacyLevel > DiplomacyLevel.Normal:
-                if (!ModState.IsTreatyValid(playerFaction, otherFaction, DiplomacyTreatyType.Nap) && !hasBrokenAlliance)
-                    OfferTreatyOption(DiplomacyTreatyType.Nap, __instance);
-                // TODO: investigate if offering IntelSharing is correct here
-                else if (!ModState.IsTreatyValid(playerFaction, otherFaction, DiplomacyTreatyType.Intel) && !hasBrokenAlliance)
-                    OfferTreatyOption(DiplomacyTreatyType.Intel, __instance);
-                break;
-            case DiplomacyLevel.Friendly when maxDiplomacyLevel > DiplomacyLevel.Friendly:
                 if (!hasBrokenAlliance)
-                    OfferTreatyOption(DiplomacyTreatyType.Alliance, __instance);
+                {
+                    var hasReset = ModState.IsTreatyValid(playerFaction, otherFaction, DiplomacyTreatyType.ResetRelation);
+                    if (!hasReset)
+                        UnlockTreatyOption(DiplomacyTreatyType.ResetRelation, __instance);
+                }
+
+                break;
+            case DiplomacyLevel.Normal when maxDiplomacyLevel > DiplomacyLevel.Normal && !hasBrokenAlliance:
+
+                if (!ModState.IsTreatyValid(playerFaction, otherFaction, DiplomacyTreatyType.Nap))
+                    UnlockTreatyOption(DiplomacyTreatyType.Nap, __instance);
+
+                break;
+            // firendly will only be set if there is nap already or intel is shared
+            // so just check if already intel is shared if not, offer it
+            case DiplomacyLevel.Friendly when maxDiplomacyLevel >= DiplomacyLevel.Friendly
+                 && !hasBrokenAlliance
+                 && !ModState.IsTreatyValid(playerFaction, otherFaction, DiplomacyTreatyType.Intel):
+
+
+                UnlockTreatyOption(DiplomacyTreatyType.Intel, __instance);
+
+                break;
+            case DiplomacyLevel.Friendly when maxDiplomacyLevel == DiplomacyLevel.Allied && !hasBrokenAlliance:
+
+                // for now offer alliance only if there is already intel sharing 
+                if (playerFaction.IsIntelSharedBy(otherFaction) || otherFaction.IsIntelSharedBy(playerFaction))
+                    UnlockTreatyOption(DiplomacyTreatyType.Alliance, __instance);
+
                 break;
             case DiplomacyLevel.Allied:
-                OfferTreatyOption(DiplomacyTreatyType.AllianceBroken, __instance);
+                UnlockTreatyOption(DiplomacyTreatyType.AllianceBroken, __instance);
                 break;
         }
     }
@@ -71,7 +89,7 @@ public class DiplomacyControllerPatch
     [HarmonyPatch(nameof(DiplomacyController.EvaluateTrade))]
     private static void EvaluateTradePrefix(DiplomacyController __instance)
     {
-        // here we know a treaty was selected
+        // here we know a treaty was selected, set it so it can be provessed in TIFactionState.ProcessTrade (also patched)
         ModState.CurrentTreatyType = __instance.aiTableTreatyItem.gameObject.activeSelf
             ? _possibleTreaty
             : DiplomacyTreatyType.None;
@@ -90,10 +108,11 @@ public class DiplomacyControllerPatch
             __instance.aiTableHateReductionItem.gameObject.SetActive(false);
     }
 
-    private static void OfferTreatyOption(DiplomacyTreatyType treatyType, DiplomacyController diplomacyController)
+    private static void UnlockTreatyOption(DiplomacyTreatyType treatyType, DiplomacyController diplomacyController)
     {
         var text = "";
         var description = "";
+        var setTreatyType = TradeOffer.TreatyType.None;
         _possibleTreaty = treatyType;
 
         switch (treatyType)
@@ -101,39 +120,46 @@ public class DiplomacyControllerPatch
             case DiplomacyTreatyType.Truce:
                 text = Loc.T("UI.Notifications.Diplomacy.Truce");
                 description = Loc.T("UI.Notifications.Diplomacy.TruceDesc", 12);
-                diplomacyController.aiTableTreatyItem.treaty = TradeOffer.TreatyType.Truce;
+                setTreatyType = TradeOffer.TreatyType.Truce;
                 break;
             case DiplomacyTreatyType.Nap:
                 text = Loc.T("UI.Notifications.Diplomacy.NAP");
                 description = Loc.T("UI.Notifications.Diplomacy.NAPDesc");
-                diplomacyController.aiTableTreatyItem.treaty = TradeOffer.TreatyType.NAP;
+                setTreatyType = TradeOffer.TreatyType.NAP;
                 break;
             case DiplomacyTreatyType.ResetRelation:
                 text = Loc.T("TIDiplomacy.UI.Notifications.ResetRelations");
                 description = Loc.T("TIDiplomacy.UI.Notifications.ResetRelationsDescription");
-                diplomacyController.aiTableTreatyItem.treaty = TradeOffer.TreatyType.None;
                 break;
             case DiplomacyTreatyType.Intel:
-                text = Loc.T("TIDiplomacy.UI.Notifications.Intel");
-                description = Loc.T("TIDiplomacy.UI.Notifications.Intel");
-                diplomacyController.aiTableTreatyItem.treaty = TradeOffer.TreatyType.Intel;
+                text = Loc.T("UI.Notifications.Diplomacy.IntelSharing");
+                description = Loc.T("UI.Notifications.Diplomacy.IntelSharingDesc");
+                setTreatyType = TradeOffer.TreatyType.Intel;
                 break;
             case DiplomacyTreatyType.Alliance:
                 text = Loc.T("TIDiplomacy.UI.Notifications.Alliance");
                 description = Loc.T("TIDiplomacy.UI.Notifications.AllianceDescription");
-                diplomacyController.aiTableTreatyItem.treaty = TradeOffer.TreatyType.None;
                 break;
             case DiplomacyTreatyType.AllianceBroken:
                 text = Loc.T("TIDiplomacy.UI.Notifications.BreakAlliance");
                 description = Loc.T("TIDiplomacy.UI.Notifications.BreakAllianceDescription");
-                diplomacyController.aiTableTreatyItem.treaty = TradeOffer.TreatyType.None;
                 break;
         }
 
         diplomacyController.aiBankTreatyItem.gameObject.SetActive(true);
         diplomacyController.aiBankTreatyItem.quantityText.text = text;
-        diplomacyController.aiTableTreatyItem.itemDescription.text = text;
         diplomacyController.aiBankTreatyItem.tooltipTrigger.SetDelegate("BodyText", () => description);
+
+        diplomacyController.aiTableTreatyItem.itemDescription.text = text;
         diplomacyController.aiTableTreatyItem.tooltipTrigger.SetDelegate("BodyText", () => description);
+        diplomacyController.aiTableTreatyItem.treaty = setTreatyType;
+
+        diplomacyController.playerBankTreatyItem.gameObject.SetActive(true);
+        diplomacyController.playerBankTreatyItem.quantityText.text = text;
+        diplomacyController.playerBankTreatyItem.tooltipTrigger.SetDelegate("BodyText", () => description);
+
+        diplomacyController.playerTableTreatyItem.itemDescription.text = text;
+        diplomacyController.playerTableTreatyItem.tooltipTrigger.SetDelegate("BodyText", () => description);
+        diplomacyController.playerTableTreatyItem.treaty = setTreatyType;
     }
 }

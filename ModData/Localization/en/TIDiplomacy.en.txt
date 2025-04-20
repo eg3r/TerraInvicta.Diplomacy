@@ -7,3 +7,4 @@ TIDiplomacy.UI.Notifications.AllianceDescription=Agreement to be in an alliance.
 TIDiplomacy.UI.Notifications.BreakAlliance=Break Alliance
 TIDiplomacy.UI.Notifications.BreakAllianceDescription=Break alliance and worsen relations with each other to a conflict level.
 TIDiplomacy.UI.Notifications.Allied=Allied
+TIDiplomacy.UI.Notifications.BreakAllianceNotPossible=Alliance can only be broken in the treaty interaction.
