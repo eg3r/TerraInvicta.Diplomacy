@@ -12,18 +12,6 @@ namespace Diplomacy.Core.Patches;
 [HarmonyPatch(typeof(IntelFactionRelationsGridItemController))]
 public class IntelFactionRelationsGridItemControllerPatch
 {
-    private static string GetAttitudeText(DiplomacyLevel diplomacyLevel, bool isAlienFaction)
-    {
-        return diplomacyLevel switch
-        {
-            DiplomacyLevel.War => Loc.T("UI.Intel.FactionWar"),                                 // War
-            DiplomacyLevel.Conflict or DiplomacyLevel.Enemy => Loc.T("UI.Intel.FactionHate10"), // In Conflict
-            DiplomacyLevel.Allied => isAlienFaction ? Loc.T("UI.Intel.FactionLove")             // Support
-                                : Loc.T("TIDiplomacy.UI.Notifications.Allied"),                 // Allied
-            _ => Loc.T("UI.Intel.FactionHate0"),                                                // Tolerance
-        };
-    }
-
     [HarmonyPostfix]
     [HarmonyPatch(nameof(IntelFactionRelationsGridItemController.SetListItem))]
     private static void SetListItemPrefix(
@@ -31,23 +19,20 @@ public class IntelFactionRelationsGridItemControllerPatch
         TIFactionState judgedFaction,
         IntelFactionRelationsGridItemController __instance)
     {
+        // for now only difference is when we are allied, aliens can't be allied as per this mod mechanics for now
         var currentDiplomacyLevel = primaryFactioninUI.CurrentDiplomacyLevelWith(judgedFaction);
-        var attitudeText = GetAttitudeText(currentDiplomacyLevel, judgedFaction.IsAlienFaction);
-        var originalTreatyText = __instance.attitudeDescription.text?.Split(", ").LastOrDefault()?.Trim() ?? string.Empty;
-        var treatyText = originalTreatyText;
-
-        if (currentDiplomacyLevel == DiplomacyLevel.Allied)
+        if (currentDiplomacyLevel == DiplomacyLevel.Allied && !judgedFaction.IsAlienFaction)
         {
-            treatyText = Loc.T("TIDiplomacy.UI.Notifications.Alliance"); // Alliance
+            var treatyText = Loc.T("TIDiplomacy.UI.Notifications.Alliance"); // Alliance
             __instance.cancelTreatyButtonTip.SetDelegate("BodyText", () => Loc.T("TIDiplomacy.UI.Notifications.BreakAllianceNotPossible"));
-            __instance.cancelTreatyButtonObject.SetActive(false);
+            __instance.cancelTreatyButtonObject.SetActive(true);
+
+            if (TIGlobalConfig.globalConfig.debug_showHateValues)
+                treatyText += " (" + primaryFactioninUI.GetFactionHate(judgedFaction) + " hate)";
+
+            // Combine base attitude and treaty status
+            __instance.attitudeDescription.SetText(treatyText);
         }
-
-        if (TIGlobalConfig.globalConfig.debug_showHateValues)
-            treatyText += " (" + primaryFactioninUI.GetFactionHate(judgedFaction) + " hate)";
-
-        // Combine base attitude and treaty status
-        __instance.attitudeDescription.SetText($"{attitudeText}, {treatyText}");
     }
 
     // This is not needed for now, as a ref for future development:
@@ -60,5 +45,17 @@ public class IntelFactionRelationsGridItemControllerPatch
     //     var judgedFaction = accesorTraverse.Field("judgedFaction").GetValue<TIFactionState>();
     //     var currentDiplomacyLevel = primaryFactioninUI.CurrentDiplomacyLevelWith(judgedFaction);
     //     return currentDiplomacyLevel != DiplomacyLevel.Allied;
+    // }
+
+    // private static string GetAttitudeText(DiplomacyLevel diplomacyLevel, bool isAlienFaction)
+    // {
+    //     return diplomacyLevel switch
+    //     {
+    //         DiplomacyLevel.War => Loc.T("UI.Intel.FactionWar"),                                 // War
+    //         DiplomacyLevel.Conflict or DiplomacyLevel.Enemy => Loc.T("UI.Intel.FactionHate10"), // In Conflict
+    //         DiplomacyLevel.Allied => isAlienFaction ? Loc.T("UI.Intel.FactionLove")             // Support
+    //                             : Loc.T("TIDiplomacy.UI.Notifications.Allied"),                 // Allied
+    //         _ => Loc.T("UI.Intel.FactionHate0"),                                                // Tolerance
+    //     };
     // }
 }
