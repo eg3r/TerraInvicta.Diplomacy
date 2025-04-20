@@ -19,6 +19,5 @@ public static class CommonHelpers
     {
         // for now use the games save folder
         return Path.Combine(CreateSaveFileScrollList.GetSaveFolderPath(), "DiplomacyModSaves");
-        //return Path.Combine(GetModFolderPath(), "DiplomacyModSaves");
     }
 }

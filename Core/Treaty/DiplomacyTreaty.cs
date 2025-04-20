@@ -68,9 +68,10 @@ public class DiplomacyTreaty
             case DiplomacyTreatyType.AllianceBroken:
                 return TITimeState.CampaignDuration_days() - _treatyGameDay < ModState.AllianceBrokenValidDays;
             case DiplomacyTreatyType.Intel:
-                return GetInitiator().intelSharingFactions.Contains(GetOther())
-                        // prevents repeat before max duration
-                        || TITimeState.CampaignDuration_days() - _treatyGameDay < ModState.IntelSharingRepeatDays;
+                // intel like alliacne does not run out, can only be broken atm.
+                var initiator = GetInitiator();
+                var other = GetOther();
+                return initiator.IsIntelSharedBy(other) || other.IsIntelSharedBy(initiator);
             case DiplomacyTreatyType.None:
             default:
                 return false;
