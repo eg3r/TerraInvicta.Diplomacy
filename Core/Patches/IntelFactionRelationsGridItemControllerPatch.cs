@@ -1,4 +1,5 @@
-﻿using Diplomacy.Core.Helpers;
+﻿using System.Linq;
+using Diplomacy.Core.Helpers;
 using HarmonyLib;
 using PavonisInteractive.TerraInvicta;
 
