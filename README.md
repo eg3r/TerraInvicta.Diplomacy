@@ -60,3 +60,12 @@ A mod for Terra Invicta aimed at improving player experience regarding Relations
 ### Contribution
 
 All PRs are welcome and encouraged 👍.
+
+### Development Setup
+
+1. Some kind of IDE is needed, that supports .NET (C#) Development, be it from IntelliJ, Microsoft or similar (like VSCode, Rider, Visual Studio etc.)
+2. Download and install Unity Mod Manager, this will also get Harmony0 DLL into the game folder (Documentation and infos: https://github.com/pardeike/Harmony )
+3. Set the TERRAINVICTA_PATH environment variable to point to your TI installation path
+4. run ```dotnet build``` (or ```dotnet build --configuration Release```) to build, on success the setup should copy the mod into the TI active mods folder
+
+To be able to debug using the IDEs debugger, unity debug build needs to be setup correctly for TI.  
