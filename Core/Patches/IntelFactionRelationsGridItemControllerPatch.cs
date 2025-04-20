@@ -1,8 +1,7 @@
-﻿using Diplomacy.Core.Helpers;
+﻿using System.Linq;
+using Diplomacy.Core.Helpers;
 using HarmonyLib;
 using PavonisInteractive.TerraInvicta;
-using UnityModManagerNet;
-using System.Text; // Added for StringBuilder
 
 // ReSharper disable UnusedMember.Local
 // ReSharper disable UnusedType.Global
@@ -13,88 +12,53 @@ namespace Diplomacy.Core.Patches;
 [HarmonyPatch(typeof(IntelFactionRelationsGridItemController))]
 public class IntelFactionRelationsGridItemControllerPatch
 {
-    [HarmonyPrefix]
+    private static string GetAttitudeText(DiplomacyLevel diplomacyLevel, bool isAlienFaction)
+    {
+        return diplomacyLevel switch
+        {
+            DiplomacyLevel.War => Loc.T("UI.Intel.FactionWar"),                                 // War
+            DiplomacyLevel.Conflict or DiplomacyLevel.Enemy => Loc.T("UI.Intel.FactionHate10"), // In Conflict
+            DiplomacyLevel.Allied => isAlienFaction ? Loc.T("UI.Intel.FactionLove")             // Support
+                                : Loc.T("TIDiplomacy.UI.Notifications.Allied"),                 // Allied
+            _ => Loc.T("UI.Intel.FactionHate0"),                                                // Tolerance
+        };
+    }
+
+    [HarmonyPostfix]
     [HarmonyPatch(nameof(IntelFactionRelationsGridItemController.SetListItem))]
-    private static bool SetListItemPrefix(
+    private static void SetListItemPrefix(
         TIFactionState primaryFactioninUI,
         TIFactionState judgedFaction,
         IntelFactionRelationsGridItemController __instance)
     {
-        // Set instance variables like original method
-        Traverse.Create(__instance).Field("primaryFactioninUI").SetValue(primaryFactioninUI);
-        Traverse.Create(__instance).Field("judgedFaction").SetValue(judgedFaction);
-
-        __instance.factionIcon.sprite = judgedFaction.factionIcon64UI;
         var currentDiplomacyLevel = primaryFactioninUI.CurrentDiplomacyLevelWith(judgedFaction);
+        var attitudeText = GetAttitudeText(currentDiplomacyLevel, judgedFaction.IsAlienFaction);
+        var originalTreatyText = __instance.attitudeDescription.text?.Split(", ").LastOrDefault()?.Trim() ?? string.Empty;
+        var treatyText = originalTreatyText;
 
-        // Determine base attitude using patch logic
-        string baseAttitude = currentDiplomacyLevel switch
+        if (currentDiplomacyLevel == DiplomacyLevel.Allied)
         {
-            DiplomacyLevel.War => Loc.T("UI.Intel.FactionWar"),
-            DiplomacyLevel.Conflict or DiplomacyLevel.Enemy => Loc.T("UI.Intel.FactionHate10"),
-            DiplomacyLevel.Allied => judgedFaction.IsAlienFaction
-                                ? Loc.T("UI.Intel.FactionLove")
-                                : Loc.T("TIDiplomacy.UI.Notifications.Allied"),
-            _ => Loc.T("UI.Intel.FactionHate0"),
-        };
-
-        // Determine treaty status string and manage cancel button (incorporating original logic)
-        StringBuilder treatyStatusBuilder = new StringBuilder();
-        string treatyStatus = "";
-        bool showCancelButton = false;
-        string cancelTooltipKey = "";
-
-        // Check Truce first (original logic order)
-        if (primaryFactioninUI.HasTruce(judgedFaction, includeToBeDiscarded: false))
-        {
-            treatyStatus = treatyStatusBuilder.Append(", ").Append(Loc.T("UI.Notifications.Diplomacy.Truce")).ToString();
-            showCancelButton = false; // Cannot cancel Truce from here
-        }
-        // Check NAP / Intel Sharing
-        else if (primaryFactioninUI.HasNAP(judgedFaction, includeToBeDiscarded: false))
-        {
-            treatyStatusBuilder.Append(", ").Append(Loc.T("UI.Notifications.Diplomacy.NAP"));
-            // Check Intel Sharing within NAP (original logic)
-            if (primaryFactioninUI.intelSharingFactions.Contains(judgedFaction))
-            {
-                treatyStatusBuilder.Append(", ").Append(Loc.T("UI.Notifications.Diplomacy.IntelSharing"));
-                cancelTooltipKey = "UI.Intel.Faction.Relations.CancelTreaty_Intel";
-                // Show cancel button only if the player is the one whose relations are being judged (original logic)
-                showCancelButton = GameControl.control.activePlayer == judgedFaction;
-            }
-            else // Just NAP
-            {
-                cancelTooltipKey = "UI.Intel.Faction.Relations.CancelTreaty_NAP";
-                // Show cancel button only if player is judged faction AND not permanent ally (original logic)
-                showCancelButton = GameControl.control.activePlayer == judgedFaction && currentDiplomacyLevel != DiplomacyLevel.Allied;
-            }
-            treatyStatus = treatyStatusBuilder.ToString();
-        }
-        else // No Truce or NAP
-        {
-            showCancelButton = false;
+            treatyText = Loc.T("TIDiplomacy.UI.Notifications.Alliance"); // Alliance
+            __instance.cancelTreatyButtonTip.SetDelegate("BodyText", () => Loc.T("TIDiplomacy.UI.Notifications.BreakAllianceNotPossible"));
+            __instance.cancelTreatyButtonObject.SetActive(false);
         }
 
-        // Set Cancel Button state
-        __instance.cancelTreatyButtonObject.SetActive(showCancelButton);
-        if (showCancelButton && !string.IsNullOrEmpty(cancelTooltipKey))
-        {
-            // Use a local variable capture for the delegate
-            string tooltipText = Loc.T(cancelTooltipKey);
-            __instance.cancelTreatyButtonTip.SetDelegate("BodyText", () => tooltipText);
-        }
+        if (TIGlobalConfig.globalConfig.debug_showHateValues)
+            treatyText += " (" + primaryFactioninUI.GetFactionHate(judgedFaction) + " hate)";
 
         // Combine base attitude and treaty status
-        string finalAttitudeText = baseAttitude + treatyStatus;
-
-        // Add debug hate value (original logic)
-        if (TIGlobalConfig.globalConfig.debug_showHateValues)
-        {
-            finalAttitudeText += $" ({primaryFactioninUI.GetFactionHate(judgedFaction):F0} hate)";
-        }
-
-        __instance.attitudeDescription.SetText(finalAttitudeText);
-
-        return false; // Prevent original method execution
+        __instance.attitudeDescription.SetText($"{attitudeText}, {treatyText}");
     }
+
+    // This is not needed for now, as a ref for future development:
+    // [HarmonyPrefix]
+    // [HarmonyPatch(nameof(IntelFactionRelationsGridItemController.OnClickCancelTreaty))]
+    // private static bool OnClickCancelTreaty(IntelFactionRelationsGridItemController __instance)
+    // {
+    //     var accesorTraverse = Traverse.Create(__instance);
+    //     var primaryFactioninUI = accesorTraverse.Field("primaryFactioninUI").GetValue<TIFactionState>();
+    //     var judgedFaction = accesorTraverse.Field("judgedFaction").GetValue<TIFactionState>();
+    //     var currentDiplomacyLevel = primaryFactioninUI.CurrentDiplomacyLevelWith(judgedFaction);
+    //     return currentDiplomacyLevel != DiplomacyLevel.Allied;
+    // }
 }

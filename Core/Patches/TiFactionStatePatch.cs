@@ -169,6 +169,7 @@ public class TiFactionStatePatch
     [HarmonyPatch(nameof(TIFactionState.AddAvailableCouncilor))]
     private static void AddAvailableCouncilorPostfix(TICouncilorState councilor, TIFactionState __instance)
     {
+        // if councilor is added to the faction, add intel to all allies
         __instance.GetAlliances().ForEach(faction =>
             faction.SetIntelIfValueHigher(councilor, TemplateManager.global.intelToSeeCouncilorMission));
     }
