@@ -2,6 +2,8 @@
 using Diplomacy.Core.Helpers;
 using HarmonyLib;
 using PavonisInteractive.TerraInvicta;
+using UnityModManagerNet;
+using System.Text; // Added for StringBuilder
 
 // ReSharper disable UnusedMember.Local
 // ReSharper disable UnusedType.Global
