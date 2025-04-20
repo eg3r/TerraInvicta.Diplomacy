@@ -54,23 +54,9 @@ public class TiFactionStatePatch
                 if (firstPass)
                     ModState.RemoveNapTreaty(__instance, otherFaction);
 
-                // share intel for faction
-                __instance.SetIntelIfValueHigher(otherFaction, TemplateManager.global.intelToSeeFactionProjects);
-
-                // share all councilors intel
-                foreach (var councilor in otherFaction.councilors)
-                    __instance.SetIntelIfValueHigher(councilor, TemplateManager.global.intelToSeeCouncilorMission);
-
-                // share all known councilor of other factions
-                otherFaction.EnemyCouncilorsIHaveIntelOn(null).ForEach(
-                    councilor => __instance.SetIntelIfValueHigher(councilor, otherFaction.GetIntel(councilor))
-                );
-
-                // share intel for all known factions
-                GameStateManager.AllFactions().Where(f => f != __instance && f != otherFaction)
-                    .ForEach(faction => __instance.SetIntelIfValueHigher(faction, otherFaction.GetIntel(faction)));
-
-                // TODO: add more intel like space bodies, needs private access to "intel"
+                // !NEW NOW: BeginIntelSharingWith call takes care of intel sharing
+                if (!__instance.IsIntelSharedBy(otherFaction))
+                    otherFaction.BeginIntelSharingWith(__instance);
 
                 // reset modifier as it is not needed anymore for this treaty type
                 tradeHateModifier = 0;
@@ -80,14 +66,17 @@ public class TiFactionStatePatch
                 if (firstPass)
                     ModState.RemoveAllianceTreaty(__instance, otherFaction);
 
+                // remove intel sharing
+                __instance.EndIntelSharingWith(otherFaction);
+
                 // after alliance was broken add hate
                 tradeHateModifier = -TemplateManager.global.factionHateConflictThreshold;
                 break;
+            // the base game treaties are still done by the game
             case DiplomacyTreatyType.Intel:
             case DiplomacyTreatyType.Truce:
             case DiplomacyTreatyType.Nap:
             case DiplomacyTreatyType.None:
-
             default:
                 break;
         }

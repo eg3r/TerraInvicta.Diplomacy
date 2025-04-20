@@ -64,6 +64,14 @@ public static class FactionHelper
         return ModState.IsTreatyValid(faction, other, DiplomacyTreatyType.Alliance);
     }
 
+    public static bool IsIntelSharedBy(this TIFactionState faction, TIFactionState other)
+    {
+        // if sharing intel, (this) is added to the (other) intelSharingFactions list
+        // meaning we need to check their intelSharingFactions list if we share itel with them
+        // and our intelSharingFactions list if they share intel with us
+        return faction.intelSharingFactions.Contains(other);
+    }
+
     public static List<TIFactionState> GetAlliances(this TIFactionState faction)
     {
         return ModState.GetAlliancesFor(faction);
