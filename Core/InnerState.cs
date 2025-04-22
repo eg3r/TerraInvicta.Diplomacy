@@ -10,5 +10,5 @@ namespace Diplomacy.Core;
 internal sealed class InnerState
 {
     [JsonProperty] public string SaveVersion = "1.0.1";
-    [JsonProperty] public List<DiplomacyTreaty> Treaties = new();
+    [JsonProperty] public List<DiplomacyTreaty> Treaties = [];
 }

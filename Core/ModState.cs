@@ -140,11 +140,14 @@ public static class ModState
             .Where(p => typeof(ISaveFix).IsAssignableFrom(p) && !p.IsInterface && !p.IsAbstract)
             .Select(Activator.CreateInstance)
             .Cast<ISaveFix>()
-            .Where(s => s.FromVersion == _innerState.SaveVersion && s.ToVersion == toVersion)];
+            .Where(s => s.FromVersion == fromVersion && s.ToVersion == toVersion)];
 
     public static void FixSave(GameControl gameControl)
     {
         var currentSaveVersion = new InnerState().SaveVersion;
+        if (currentSaveVersion == _innerState.SaveVersion)
+            return;
+
         GetSaveFixes(_innerState.SaveVersion, currentSaveVersion).ForEach(fix => fix.Fix(gameControl, Treaties));
         _innerState.SaveVersion = currentSaveVersion;
     }
