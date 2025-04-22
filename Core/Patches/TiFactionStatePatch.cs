@@ -17,9 +17,6 @@ namespace Diplomacy.Core.Patches;
 [HarmonyPatch(typeof(TIFactionState))]
 public class TiFactionStatePatch
 {
-    // guard for possible cyclic intel update on alliances
-    private static volatile bool bAllyIntelUpdateInProgress;
-
     // NOTE: ProcessTrade is called twice from DiplomacyTradeAction.Execute (once for each trade side)
     [HarmonyPrefix]
     [HarmonyPatch(nameof(TIFactionState.ProcessTrade))]
@@ -136,43 +133,6 @@ public class TiFactionStatePatch
         return __instance.HasAllianceWith(faction);
     }
 
-    [HarmonyPrefix]
-    [HarmonyPatch(nameof(TIFactionState.SetIntel))]
-    private static bool SetIntelPrefix(TIGameState intelTarget, float value, TIFactionState __instance)
-    {
-        // while setting up trade make sure to be able to set intel on those factions
-        if (ModState.CurrentTreatyType != DiplomacyTreatyType.None)
-            return true;
-
-        // if allied -> stop each others intel decay
-        if ((intelTarget.isFactionState || intelTarget.isCouncilorState) &&
-            __instance.HasAllianceWith(intelTarget.ref_faction))
-            return false;
-
-        // if gained intel and have allies, add it also to ally
-        if (bAllyIntelUpdateInProgress)
-        {
-            bAllyIntelUpdateInProgress = false;
-            return true;
-        }
-
-        foreach (var ally in __instance.GetAlliances())
-        {
-            bAllyIntelUpdateInProgress = true;
-            ally.SetIntelIfValueHigher(intelTarget, value);
-        }
-
-        return true;
-    }
-
-    [HarmonyPostfix]
-    [HarmonyPatch(nameof(TIFactionState.AddAvailableCouncilor))]
-    private static void AddAvailableCouncilorPostfix(TICouncilorState councilor, TIFactionState __instance)
-    {
-        // if councilor is added to the faction, add intel to all allies
-        __instance.GetAlliances().ForEach(faction =>
-            faction.SetIntelIfValueHigher(councilor, TemplateManager.global.intelToSeeCouncilorMission));
-    }
 
     [HarmonyPrefix]
     [HarmonyPatch(nameof(TIFactionState.StealableProjects))]

@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using Diplomacy.Core.Treaty;
 using PavonisInteractive.TerraInvicta;
@@ -132,5 +133,19 @@ public static class ModState
             treaty => treaty.GetOther() != faction
                 ? treaty.GetOther()
                 : treaty.GetInitiator()).ToList();
+    }
+
+    private static List<ISaveFix> GetSaveFixes(string fromVersion, string toVersion) => [.. AppDomain.CurrentDomain.GetAssemblies()
+            .SelectMany(s => s.GetTypes())
+            .Where(p => typeof(ISaveFix).IsAssignableFrom(p) && !p.IsInterface && !p.IsAbstract)
+            .Select(Activator.CreateInstance)
+            .Cast<ISaveFix>()
+            .Where(s => s.FromVersion == _innerState.SaveVersion && s.ToVersion == toVersion)];
+
+    public static void FixSave(GameControl gameControl)
+    {
+        var currentSaveVersion = new InnerState().SaveVersion;
+        GetSaveFixes(_innerState.SaveVersion, currentSaveVersion).ForEach(fix => fix.Fix(gameControl, Treaties));
+        _innerState.SaveVersion = currentSaveVersion;
     }
 }
