@@ -29,9 +29,7 @@ public class DiplomacyTreaty
 
     [JsonProperty] public int InitiatorID { get; }
     [JsonProperty] public int OtherID { get; }
-
     [JsonProperty] public DiplomacyTreatyType TreatyType { get; }
-
     [JsonIgnore] public bool IsValid => CheckIfValid();
     [JsonIgnore] public int TreatyGameDay => _treatyGameDay;
 
@@ -47,7 +45,7 @@ public class DiplomacyTreaty
 
     private bool CheckIfValid()
     {
-        // check used for treaty creation, if the days are small (same day) treaty is still in creation
+        // Check used for treaty creation, if the days are small (same day) treaty is still in creation
         if (TITimeState.CampaignDuration_days() - _treatyGameDay < 3)
             return true;
 
@@ -55,23 +53,29 @@ public class DiplomacyTreaty
         {
             case DiplomacyTreatyType.ResetRelation:
                 return TITimeState.CampaignDuration_days() - _treatyGameDay < ModState.ResetRelationsTreatyValidDays;
+                
             case DiplomacyTreatyType.Nap:
                 return GetInitiator().HasNap(GetOther())
-                        // prevents repeat before max duration
-                        || TITimeState.CampaignDuration_days() - _treatyGameDay < ModState.NapTreatyRepeatDays;
+                    // Prevents repeat before max duration
+                    || TITimeState.CampaignDuration_days() - _treatyGameDay < ModState.NapTreatyRepeatDays;
+                    
             case DiplomacyTreatyType.Truce:
                 return GetInitiator().HasTruce(GetOther())
-                        // prevents repeat before max duration
-                        || TITimeState.CampaignDuration_days() - _treatyGameDay < ModState.TruceTreatyRepeatDays;
+                    // Prevents repeat before max duration
+                    || TITimeState.CampaignDuration_days() - _treatyGameDay < ModState.TruceTreatyRepeatDays;
+                    
             case DiplomacyTreatyType.Alliance:
-                return true; // alliance does not run out, can only be broken atm.
+                return true; // Alliance does not run out, can only be broken
+                
             case DiplomacyTreatyType.AllianceBroken:
                 return TITimeState.CampaignDuration_days() - _treatyGameDay < ModState.AllianceBrokenValidDays;
+                
             case DiplomacyTreatyType.Intel:
-                // intel like alliacne does not run out, can only be broken atm.
+                // Intel like alliance does not run out, can only be broken
                 var initiator = GetInitiator();
                 var other = GetOther();
                 return initiator.IsIntelSharedBy(other) || other.IsIntelSharedBy(initiator);
+                
             case DiplomacyTreatyType.None:
             default:
                 return false;

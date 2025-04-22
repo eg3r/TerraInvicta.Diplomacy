@@ -58,11 +58,6 @@
         </Reference>
     </ItemGroup>
 
-    <!--    <Target Name="PostBuild" AfterTargets="PostBuildEvent">-->
-    <!--        <Exec-->
-    <!--                Command="xcopy &quot;$(TargetDir)$(ProjectName).dll&quot; &quot;$(TERRAINVICTA_PATH)\Mods\Enabled\$(ProjectName)\$(ProjectName).dll&quot; /F /R /Y /I &#xA;xcopy &quot;$(TargetDir)$(ProjectName).pdb&quot; &quot;$(TERRAINVICTA_PATH)\Mods\Enabled\$(ProjectName)\$(ProjectName).pdb&quot; /F /R /Y /I"/>-->
-    <!--    </Target>-->
-
     <Target Name="PostBuild" AfterTargets="PostBuildEvent">
         <Copy SourceFiles="$(ProjectDir)ModData\ModInfo.json" DestinationFiles="$(TERRAINVICTA_PATH)\Mods\Enabled\$(ProjectName)\ModInfo.json" OverwriteReadOnlyFiles="true" />
         <Copy SourceFiles="$(TargetDir)$(ProjectName).dll" DestinationFiles="$(TERRAINVICTA_PATH)\Mods\Enabled\$(ProjectName)\$(ProjectName).dll" OverwriteReadOnlyFiles="true" />

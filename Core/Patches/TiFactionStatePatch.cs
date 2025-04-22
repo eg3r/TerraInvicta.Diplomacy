@@ -3,14 +3,7 @@ using System.Linq;
 using Diplomacy.Core.Helpers;
 using Diplomacy.Core.Treaty;
 using HarmonyLib;
-using ModestTree;
 using PavonisInteractive.TerraInvicta;
-
-// ReSharper disable UnusedMember.Local
-// ReSharper disable UnusedParameter.Local
-// ReSharper disable InconsistentNaming
-// ReSharper disable UnusedType.Global
-// ReSharper disable UnusedMember.Local
 
 namespace Diplomacy.Core.Patches;
 

@@ -18,7 +18,7 @@ public class DiplomacyControllerPatch
     [HarmonyPatch("LoadBankValues")]
     private static void Postfix(DiplomacyController __instance, bool ___isThisAnAIOffer)
     {
-        // TODO: Ai is not handled right now
+        // AI offers not currently handled
         if (___isThisAnAIOffer)
             return;
 
@@ -28,7 +28,7 @@ public class DiplomacyControllerPatch
         var playerFaction = GameControl.control.activePlayer;
         var otherFaction = __instance.tradingFaction;
 
-        // apply cooldown of treaties 
+        // Apply cooldown of treaties 
         var latestTreaty = playerFaction.GetLatestActiveTreaty(otherFaction);
         if (latestTreaty != null &&
             TITimeState.CampaignDuration_days() - latestTreaty.TreatyGameDay < ModState.MinDaysBetweenTreaties)
@@ -41,11 +41,10 @@ public class DiplomacyControllerPatch
         switch (currentDiplomacyLevel)
         {
             case DiplomacyLevel.War when maxDiplomacyLevel > DiplomacyLevel.War:
-
                 if (!ModState.IsTreatyValid(playerFaction, otherFaction, DiplomacyTreatyType.Truce))
                     UnlockTreatyOption(DiplomacyTreatyType.Truce, __instance);
-
                 break;
+
             case DiplomacyLevel.Enemy when maxDiplomacyLevel > DiplomacyLevel.Conflict:
             case DiplomacyLevel.Conflict when maxDiplomacyLevel > DiplomacyLevel.Conflict:
                 if (!hasBrokenAlliance)
@@ -54,31 +53,26 @@ public class DiplomacyControllerPatch
                     if (!hasReset)
                         UnlockTreatyOption(DiplomacyTreatyType.ResetRelation, __instance);
                 }
-
                 break;
-            case DiplomacyLevel.Normal when maxDiplomacyLevel > DiplomacyLevel.Normal && !hasBrokenAlliance:
 
+            case DiplomacyLevel.Normal when maxDiplomacyLevel > DiplomacyLevel.Normal && !hasBrokenAlliance:
                 if (!ModState.IsTreatyValid(playerFaction, otherFaction, DiplomacyTreatyType.Nap))
                     UnlockTreatyOption(DiplomacyTreatyType.Nap, __instance);
-
                 break;
-            // firendly will only be set if there is nap already or intel is shared
-            // so just check if already intel is shared if not, offer it
+
+            // Friendly will only be set if there is NAP already or intel is shared
             case DiplomacyLevel.Friendly when maxDiplomacyLevel >= DiplomacyLevel.Friendly
                  && !hasBrokenAlliance
                  && !ModState.IsTreatyValid(playerFaction, otherFaction, DiplomacyTreatyType.Intel):
-
-
                 UnlockTreatyOption(DiplomacyTreatyType.Intel, __instance);
-
                 break;
-            case DiplomacyLevel.Friendly when maxDiplomacyLevel == DiplomacyLevel.Allied && !hasBrokenAlliance:
 
-                // for now offer alliance only if there is already intel sharing 
+            case DiplomacyLevel.Friendly when maxDiplomacyLevel == DiplomacyLevel.Allied && !hasBrokenAlliance:
+                // Offer alliance only if there is already intel sharing
                 if (playerFaction.IsIntelSharedBy(otherFaction) || otherFaction.IsIntelSharedBy(playerFaction))
                     UnlockTreatyOption(DiplomacyTreatyType.Alliance, __instance);
-
                 break;
+
             case DiplomacyLevel.Allied:
                 UnlockTreatyOption(DiplomacyTreatyType.AllianceBroken, __instance);
                 break;
@@ -89,7 +83,7 @@ public class DiplomacyControllerPatch
     [HarmonyPatch(nameof(DiplomacyController.EvaluateTrade))]
     private static void EvaluateTradePrefix(DiplomacyController __instance)
     {
-        // here we know a treaty was selected, set it so it can be provessed in TIFactionState.ProcessTrade (also patched)
+        // Set current treaty type for processing in TIFactionState.ProcessTrade
         ModState.CurrentTreatyType = __instance.aiTableTreatyItem.gameObject.activeSelf
             ? _possibleTreaty
             : DiplomacyTreatyType.None;
@@ -99,7 +93,7 @@ public class DiplomacyControllerPatch
     [HarmonyPatch(nameof(DiplomacyController.EvaluateTrade))]
     private static void EvaluateTradePostfix(DiplomacyController __instance)
     {
-        // get rid of the normal "improve relations" item when using ResetRelation
+        // Hide "improve relations" item when using certain treaty types
         if (ModState.CurrentTreatyType
             is DiplomacyTreatyType.ResetRelation
             or DiplomacyTreatyType.AllianceBroken

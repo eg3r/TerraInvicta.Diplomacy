@@ -1,10 +1,5 @@
 ﻿using System.IO;
 using HarmonyLib;
-using PavonisInteractive.TerraInvicta;
-
-// ReSharper disable InconsistentNaming
-// ReSharper disable UnusedType.Global
-// ReSharper disable UnusedMember.Local
 
 namespace Diplomacy.Core.Patches;
 

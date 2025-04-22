@@ -8,13 +8,14 @@ namespace Diplomacy.Core;
 
 public static class ModState
 {
-    public const int ResetRelationsTreatyValidDays = 365 * 2; // TODO: move into settings
-    public const int NapTreatyRepeatDays = 365 * 5; // TODO: move into settings
-    public const int TruceTreatyRepeatDays = 365 * 2; // TODO: move into settings
-    public const int AllianceBrokenValidDays = 365 * 2; // TODO: move into settings
-    public const int MinDaysBetweenTreaties = 90; // TODO: move into settings
+    // Configuration values that could be moved to settings
+    public const int ResetRelationsTreatyValidDays = 365 * 2;
+    public const int NapTreatyRepeatDays = 365 * 5;
+    public const int TruceTreatyRepeatDays = 365 * 2;
+    public const int AllianceBrokenValidDays = 365 * 2;
+    public const int MinDaysBetweenTreaties = 90;
 
-    // TODO: move to settings, ATTENTION NEEDS PATCHING TO SUPPORT OFFICIAL: TIMissionPhaseState.StartNewMissionPhase
+    // Note: Changing this requires patching TIMissionPhaseState.StartNewMissionPhase
     public const int NumberAutosaves = 3;
 
     private static InnerState _innerState = new();
@@ -24,7 +25,6 @@ public static class ModState
     public static DiplomacyTreatyType CurrentTreatyType { get; set; } = DiplomacyTreatyType.None;
 
     private static string CurrentLoadedSave { get; set; }
-
 
     private static bool IsTreatyValid(DiplomacyTreaty treaty)
     {

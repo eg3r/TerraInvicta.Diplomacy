@@ -10,14 +10,12 @@ using UnityModManagerNet;
 
 namespace Diplomacy;
 
-// ReSharper disable once UnusedType.Global
 public class ModInit
 {
     private static bool _isActive;
     private static Harmony _harmonyRef;
     private static readonly List<IModClass> ModClasses = new();
 
-    // ReSharper disable once UnusedMember.Local
     private static bool Load(UnityModManager.ModEntry modEntry)
     {
         modEntry.OnToggle = OnToggle;

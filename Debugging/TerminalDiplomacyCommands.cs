@@ -38,9 +38,7 @@ public class TerminalDiplomacyCommands : IModClass
         if (args.Length is 1)
         {
             var faction = GameStateManager.FindByTemplate<TIFactionState>(args[0] != "" ? args[0] : "EscapeCouncil");
-
             var targetCouncilor = faction.councilors.First();
-
             var councilor = GeneralControlsController.UISelectedAssetState as TICouncilorState;
 
             if (councilor == null)
@@ -58,8 +56,6 @@ public class TerminalDiplomacyCommands : IModClass
             ));
 
             councilor.activeMission.ResolveMission();
-
-            // TIPromptQueueState.AddPromptStatic(faction, councilor, mission, "PromptFactionContactMakeOffer", 0);
             return;
         }
 

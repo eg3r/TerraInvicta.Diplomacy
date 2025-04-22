@@ -3,13 +3,6 @@ using Diplomacy.Core.Helpers;
 using HarmonyLib;
 using PavonisInteractive.TerraInvicta;
 
-// ReSharper disable SuggestBaseTypeForParameter
-// ReSharper disable UnusedMember.Local
-// ReSharper disable UnusedParameter.Local
-// ReSharper disable InconsistentNaming
-// ReSharper disable UnusedType.Global
-// ReSharper disable UnusedMember.Local
-
 namespace Diplomacy.Core.Patches;
 
 [HarmonyPatch(typeof(TICouncilorState))]

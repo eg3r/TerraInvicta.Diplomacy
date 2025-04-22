@@ -1,9 +1,5 @@
 ﻿using HarmonyLib;
 
-// ReSharper disable InconsistentNaming
-// ReSharper disable UnusedMember.Local
-// ReSharper disable UnusedType.Global
-
 namespace Diplomacy.Core.Patches;
 
 /**
@@ -12,11 +8,11 @@ namespace Diplomacy.Core.Patches;
 [HarmonyPatch(typeof(GameControl))]
 public class GameControlPatch
 {
-  [HarmonyPostfix]
-  [HarmonyPatch(nameof(GameControl.CompleteInit))]
-  private static void CompleteInitPostfix(bool loadingSave, GameControl __instance)
-  {
-    if (loadingSave)
-      ModState.FixSave(__instance);
-  }
+    [HarmonyPostfix]
+    [HarmonyPatch(nameof(GameControl.CompleteInit))]
+    private static void CompleteInitPostfix(bool loadingSave, GameControl __instance)
+    {
+        if (loadingSave)
+            ModState.FixSave(__instance);
+    }
 }
