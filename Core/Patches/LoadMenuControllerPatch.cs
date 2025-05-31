@@ -1,6 +1,8 @@
 ﻿using System.IO;
 using HarmonyLib;
 
+using PavonisInteractive.TerraInvicta;
+
 namespace Diplomacy.Core.Patches;
 
 [HarmonyPatch(typeof(LoadMenuController))]
